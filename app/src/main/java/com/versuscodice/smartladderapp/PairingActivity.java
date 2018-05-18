@@ -44,7 +44,7 @@ public class PairingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                 discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 10);
-                startActivity(discoverableIntent);
+                startActivityForResult(discoverableIntent, 1);
 
                 TextView txtSSID = (TextView) findViewById(R.id.edittxtSSID);
                 String SSID = txtSSID.getText().toString();
@@ -63,6 +63,23 @@ public class PairingActivity extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                int i = 0;
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+            }
+        }
+    }
+
+
 
     @Override
     public void onPause() {
