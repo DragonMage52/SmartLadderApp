@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Zistos Smart Ladder App</string>
+    <string name="action_settings">Settings</string>
+    <string name="btnPair">Pair &amp; Transfer</string>
+</resources>
