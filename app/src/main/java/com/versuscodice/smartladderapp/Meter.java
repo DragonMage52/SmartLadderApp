@@ -15,12 +15,13 @@ public class Meter {
     String temp = "";
     Date lastUpdate;
     String meterBattery = "";
+    String battery = "";
     String oxygenLevel;
     String hydrogensulfideLevel;
     String carbondioxideLevel;
     String combExLevel;
 
-    public Meter(String mID, boolean mWariningState, boolean mAlarmState, boolean mLadderState, boolean mManState, String mTemp, String mMeterBattery, String mOxygenLevel, String mHydrogensulfideLevel, String mCarbondioxideLevel, String mCombExLevel ,Date mLastUpdate) {
+    public Meter(String mID, boolean mWariningState, boolean mAlarmState, boolean mLadderState, boolean mManState, String mTemp, String mMeterBattery, String mBattery, String mOxygenLevel, String mHydrogensulfideLevel, String mCarbondioxideLevel, String mCombExLevel ,Date mLastUpdate) {
         id = mID;
         wariningState = mWariningState;
         alarmState = mAlarmState;
@@ -29,6 +30,7 @@ public class Meter {
         temp = mTemp;
         lastUpdate = mLastUpdate;
         meterBattery = mMeterBattery;
+        battery = mBattery;
         oxygenLevel = mOxygenLevel;
         hydrogensulfideLevel = mHydrogensulfideLevel;
         carbondioxideLevel = mCarbondioxideLevel;

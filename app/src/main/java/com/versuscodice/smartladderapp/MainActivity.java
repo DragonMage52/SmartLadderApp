@@ -173,16 +173,17 @@ public class MainActivity extends AppCompatActivity {
                                 testMeter.manState = Boolean.parseBoolean(separated[4]);
                                 testMeter.temp = separated[5];
                                 testMeter.meterBattery = separated[6];
-                                testMeter.oxygenLevel = separated[7];
-                                testMeter.hydrogensulfideLevel = separated[8];
-                                testMeter.carbondioxideLevel = separated[9];
-                                testMeter.combExLevel = separated[10];
+                                testMeter.battery = separated[7];
+                                testMeter.oxygenLevel = separated[8];
+                                testMeter.hydrogensulfideLevel = separated[9];
+                                testMeter.carbondioxideLevel = separated[10];
+                                testMeter.combExLevel = separated[11];
                                 testMeter.lastUpdate = convertedDate;
                                 found = true;
                             }
                         }
                         if(found == false) {
-                            meters.add(new Meter(separated[0], Boolean.parseBoolean(separated[1]), Boolean.parseBoolean(separated[2]), Boolean.parseBoolean(separated[3]), Boolean.parseBoolean(separated[4]), separated[5], separated[6], separated[7], separated[8], separated[9], separated[10], convertedDate));
+                            meters.add(new Meter(separated[0], Boolean.parseBoolean(separated[1]), Boolean.parseBoolean(separated[2]), Boolean.parseBoolean(separated[3]), Boolean.parseBoolean(separated[4]), separated[5], separated[6], separated[7], separated[8], separated[9], separated[10], separated[11], convertedDate));
                         }
 
                         runOnUiThread(new Runnable() {

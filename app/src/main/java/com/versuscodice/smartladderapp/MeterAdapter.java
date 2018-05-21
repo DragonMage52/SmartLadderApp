@@ -59,6 +59,7 @@ public class MeterAdapter extends BaseAdapter {
             TextView txtTemp = (TextView) view.findViewById(R.id.txtTemp);
             TextView txtStatus = (TextView) view.findViewById(R.id.txtStatus);
             TextView txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
+            TextView txtLocalBatteryLevel = (TextView) view.findViewById(R.id.txtLocalBattery);
             TextView txtLastUpdate = (TextView) view.findViewById(R.id.txtLastUpdate);
             TextView txtOxygenLevel = (TextView) view.findViewById(R.id.txtOxygenLevel);
             TextView txtHydrogenSulfideLevel = (TextView) view.findViewById(R.id.txtHydrogenSulfideLevel);
@@ -67,12 +68,13 @@ public class MeterAdapter extends BaseAdapter {
             ConstraintLayout container = (ConstraintLayout) view.findViewById(R.id.meter_container);
 
             txtID.setText(thisMeter.id);
-            txtTemp.setText(thisMeter.temp);
-            txtRemoteBatteryLevel.setText(thisMeter.meterBattery);
-            txtOxygenLevel.setText(thisMeter.oxygenLevel);
-            txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel);
-            txtCarbonDioxideLevel.setText(thisMeter.carbondioxideLevel);
-            txtCombExLevel.setText(thisMeter.combExLevel);
+            txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
+            txtRemoteBatteryLevel.setText(thisMeter.meterBattery + "%");
+            txtLocalBatteryLevel.setText(thisMeter.battery + "%");
+            txtOxygenLevel.setText(thisMeter.oxygenLevel + "%");
+            txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel + "%");
+            txtCarbonDioxideLevel.setText(thisMeter.carbondioxideLevel + "%");
+            txtCombExLevel.setText(thisMeter.combExLevel + "%");
             txtLastUpdate.setText(thisMeter.lastUpdate.toString());
 
             if(thisMeter.alarmState) {
