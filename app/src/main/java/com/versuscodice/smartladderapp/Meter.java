@@ -44,6 +44,8 @@ public class Meter {
 
     Date lastUpdate;
 
+
+
     public Meter(ArrayMap<String, String> arrayMap) {
         update(arrayMap);
     }

@@ -26,12 +26,16 @@ public class PairingActivity extends AppCompatActivity {
 
     PairingActivity mActivity;
 
+    String mBluetoothName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pairing);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        mBluetoothName = mBluetoothAdapter.getName();
 
         mBluetoothAdapter.setName("ZistosSmartLadderApp");
 
@@ -89,10 +93,10 @@ public class PairingActivity extends AppCompatActivity {
     public void setStatusText(String text) {
         txtStatus.setText(text);
         if(text.equals("Connected")) {
+            mBluetoothAdapter.setName(mBluetoothName);
             finish();
         }
     }
-
 }
 
 
