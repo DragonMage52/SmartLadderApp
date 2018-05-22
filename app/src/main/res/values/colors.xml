@@ -6,4 +6,5 @@
     <color name="colorAlarm">#ff0000</color>
     <color name="colorWarning">#ffff00</color>
     <color name="colorGood">#33cc33</color>
+    <color name="colorIdle">#ffffff</color>
 </resources>

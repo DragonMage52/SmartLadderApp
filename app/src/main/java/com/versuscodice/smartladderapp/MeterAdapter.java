@@ -58,6 +58,7 @@ public class MeterAdapter extends BaseAdapter {
             TextView txtID = (TextView) view.findViewById(R.id.txtID);
             TextView txtTemp = (TextView) view.findViewById(R.id.txtTemp);
             TextView txtStatus = (TextView) view.findViewById(R.id.txtStatus);
+            TextView txtLED = (TextView) view.findViewById(R.id.txtLED);
             TextView txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
             TextView txtLocalBatteryLevel = (TextView) view.findViewById(R.id.txtLocalBattery);
             TextView txtLastUpdate = (TextView) view.findViewById(R.id.txtLastUpdate);
@@ -69,15 +70,63 @@ public class MeterAdapter extends BaseAdapter {
 
             txtID.setText(thisMeter.id);
             txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
-            txtRemoteBatteryLevel.setText(thisMeter.meterBattery + "%");
-            txtLocalBatteryLevel.setText(thisMeter.battery + "%");
+            txtRemoteBatteryLevel.setText(thisMeter.meterBatteryLevel + "%");
+            txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
             txtOxygenLevel.setText(thisMeter.oxygenLevel + "%");
             txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel + "%");
             txtCarbonDioxideLevel.setText(thisMeter.carbondioxideLevel + "%");
             txtCombExLevel.setText(thisMeter.combExLevel + "%");
             txtLastUpdate.setText(thisMeter.lastUpdate.toString());
 
-            if(thisMeter.alarmState) {
+            if(thisMeter.mAlarmState) {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
+            }
+            else if(thisMeter.mWarningState) {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorWarning));
+            }
+            else if(!thisMeter.mLadderState && !thisMeter.mManState) {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorIdle));
+            }
+            else {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorGood));
+            }
+
+            if(thisMeter.mLadderState || thisMeter.mManState) {
+                txtLED.setText("ACTIVE");
+            }
+            else if(!thisMeter.mLadderState && !thisMeter.mManState){
+                txtLED.setText("IDLE");
+            }
+
+            if(thisMeter.mMeterState) {
+                txtStatus.setText("ALARM-GAS");
+            }
+            else if(thisMeter.mAlarmOperator) {
+                txtStatus.setText("ALARM-OPERATOR");
+            }
+            else if(thisMeter.mAlarmMeterOff) {
+                txtStatus.setText("ALARM-METER-OFF");
+            }
+            else if(thisMeter.mAlarmBattery) {
+                txtStatus.setText("ALARM-BATTERY");
+            }
+            else if(thisMeter.mAlarmMeterBattery) {
+                txtStatus.setText("ALARM-METER BATTERY");
+            }
+            else if(thisMeter.mEarlyState) {
+                txtStatus.setText("SAMPLING");
+            }
+            else if(!thisMeter.mBluetoothState) {
+                txtStatus.setText("METER OFF");
+            }
+            else if(thisMeter.mEarlyDoneState && !thisMeter.mAlarmState && !thisMeter.mWarningState) {
+                txtStatus.setText("ENTER");
+            }
+            else if(!thisMeter.mLadderState && !thisMeter.mManState){
+                txtStatus.setText("IDLE");
+            }
+
+            /*if(thisMeter.alarmState) {
                 txtStatus.setText("Alarm");
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
             }
@@ -88,7 +137,7 @@ public class MeterAdapter extends BaseAdapter {
             else {
                 txtStatus.setText("Enter");
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorGood));
-            }
+            }*/
         return view;
     }
 

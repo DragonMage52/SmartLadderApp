@@ -1,5 +1,10 @@
 package com.versuscodice.smartladderapp;
 
+import android.util.ArrayMap;
+import android.util.Log;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -7,33 +12,76 @@ import java.util.Date;
  */
 
 public class Meter {
-    String id = "";
-    boolean wariningState;
-    boolean alarmState;
-    boolean ladderState;
-    boolean manState;
-    String temp = "";
-    Date lastUpdate;
-    String meterBattery = "";
-    String battery = "";
+
+    String id;
+    String temp;
+    String meterBatteryLevel;
+    String mBatteryLevel;
     String oxygenLevel;
-    String hydrogensulfideLevel;
     String carbondioxideLevel;
+    String hydrogensulfideLevel;
     String combExLevel;
 
-    public Meter(String mID, boolean mWariningState, boolean mAlarmState, boolean mLadderState, boolean mManState, String mTemp, String mMeterBattery, String mBattery, String mOxygenLevel, String mHydrogensulfideLevel, String mCarbondioxideLevel, String mCombExLevel ,Date mLastUpdate) {
-        id = mID;
-        wariningState = mWariningState;
-        alarmState = mAlarmState;
-        ladderState = mLadderState;
-        manState = mManState;
-        temp = mTemp;
-        lastUpdate = mLastUpdate;
-        meterBattery = mMeterBattery;
-        battery = mBattery;
-        oxygenLevel = mOxygenLevel;
-        hydrogensulfideLevel = mHydrogensulfideLevel;
-        carbondioxideLevel = mCarbondioxideLevel;
-        combExLevel = mCombExLevel;
+    boolean mAlarmState = false;
+    boolean mWarningState = true;
+
+    boolean mManState = false;
+    boolean mLadderState = false;
+    boolean mBatteryState = false;
+    boolean mBluetoothState = false;
+    boolean mMeterState = false;
+    boolean mEarlyState = false;
+    boolean mMeterBatteryState = false;
+    boolean mEarlyDoneState = false;
+    boolean mIdleState = false;
+    boolean mMeterBatteryDangerState = false;
+    boolean mBatteryDangerState = false;
+
+    boolean mAlarmOperator = false;
+    boolean mAlarmMeterOff = false;
+    boolean mAlarmMeterBattery = false;
+    boolean mAlarmBattery = false;
+
+    Date lastUpdate;
+
+    public Meter(ArrayMap<String, String> arrayMap) {
+        update(arrayMap);
+    }
+
+    public void update(ArrayMap<String, String> arrayMap) {
+        id = arrayMap.get("id");
+        temp = arrayMap.get("temp");
+        meterBatteryLevel = arrayMap.get("meterBatteryLevel");
+        mBatteryLevel = arrayMap.get("batteryLevel");
+        oxygenLevel = arrayMap.get("oxygenLevel");
+        carbondioxideLevel = arrayMap.get("carbondioxideLevel");
+        hydrogensulfideLevel = arrayMap.get("hydrogensulfideLevel");
+        combExLevel = arrayMap.get("combExLevel");
+        mAlarmState = Boolean.valueOf(arrayMap.get("alarmState"));
+        mWarningState = Boolean.valueOf(arrayMap.get("warningState"));
+        mManState = Boolean.valueOf(arrayMap.get("manState"));
+        mLadderState = Boolean.valueOf(arrayMap.get("ladderState"));
+        mBatteryState = Boolean.valueOf(arrayMap.get("batteryState"));
+        mBluetoothState = Boolean.valueOf(arrayMap.get("bluetoothState"));
+        mMeterState = Boolean.valueOf(arrayMap.get("meterState"));
+        mEarlyState = Boolean.valueOf(arrayMap.get("earlyState"));
+        mMeterBatteryState = Boolean.valueOf(arrayMap.get("meterbatteryState"));
+        mEarlyDoneState = Boolean.valueOf(arrayMap.get("earlydoneState"));
+        mIdleState = Boolean.valueOf(arrayMap.get("idleState"));
+        mMeterBatteryDangerState = Boolean.valueOf(arrayMap.get("meterbatterydangerState"));
+        mBatteryDangerState = Boolean.valueOf(arrayMap.get("batterydangerState"));
+        mAlarmOperator = Boolean.valueOf(arrayMap.get("alarmOperator"));
+        mAlarmMeterOff = Boolean.valueOf(arrayMap.get("alarmmeterOff"));
+        mAlarmMeterBattery = Boolean.valueOf(arrayMap.get("alarmmeterBattery"));
+        mAlarmBattery = Boolean.valueOf(arrayMap.get("alarmBattery"));
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+        lastUpdate = new Date();
+        try {
+            lastUpdate = dateFormat.parse(arrayMap.get("date"));
+        } catch (NumberFormatException | ParseException e) {
+            Log.d("TEST", "Failed to Parse");
+        }
+
     }
 }

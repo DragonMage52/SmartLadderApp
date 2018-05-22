@@ -40,3 +40,7 @@ dependencies {
 dependencies {
     compile 'co.lujun:lmbluetoothsdk:1.0.5'
 }
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.4'
+}

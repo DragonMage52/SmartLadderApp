@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridView;
 
+import com.google.gson.Gson;
 import com.rafakob.nsdhelper.NsdHelper;
 import com.rafakob.nsdhelper.NsdListener;
 import com.rafakob.nsdhelper.NsdService;
@@ -153,8 +155,12 @@ public class MainActivity extends AppCompatActivity {
                         udpSocket.receive(packet);
                         String text = new String(message, 0, packet.getLength());
                         Log.d("Received data", text);
-                        String [] separated = text.split(",");
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+                        //String [] separated = text.split(",");
+                        Gson gson = new Gson();
+                        ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
+
+
+                        /*SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
                         Date convertedDate = new Date();
                         try {
                             convertedDate = dateFormat.parse(separated[11]);
@@ -184,6 +190,19 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if(found == false) {
                             meters.add(new Meter(separated[0], Boolean.parseBoolean(separated[1]), Boolean.parseBoolean(separated[2]), Boolean.parseBoolean(separated[3]), Boolean.parseBoolean(separated[4]), separated[5], separated[6], separated[7], separated[8], separated[9], separated[10], separated[11], convertedDate));
+                        }*/
+
+                        boolean found = false;
+
+                        for(Meter testMeter : meters) {
+                            if(testMeter.id.equals(arrayMap.get("id"))) {
+                                testMeter.update(arrayMap);
+                                found = true;
+                            }
+                        }
+
+                        if(found == false) {
+                            meters.add(new Meter(arrayMap));
                         }
 
                         runOnUiThread(new Runnable() {
