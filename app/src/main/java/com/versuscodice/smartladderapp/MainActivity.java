@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             mNsdManager.unregisterService(mRegistrationListener);
             udpConnect.close();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Log.d("TEST", "Failed on Pause");
         }
         super.onPause();
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(udpConnect != null) {
+        if (udpConnect != null) {
             if (!udpConnect.isAlive()) {
                 udpConnect = new ClientListen();
                 udpConnect.start();
@@ -144,20 +143,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-                try {
-                    run = true;
-                    DatagramSocket udpSocket = new DatagramSocket();
+            try {
+                run = true;
+                DatagramSocket udpSocket = new DatagramSocket();
 
-                    byte[] message = new byte[8000];
-                    DatagramPacket packet = new DatagramPacket(message,message.length);
-                    registerService(udpSocket.getLocalPort());
-                    while (run) {
-                        udpSocket.receive(packet);
-                        String text = new String(message, 0, packet.getLength());
-                        Log.d("Received data", text);
-                        //String [] separated = text.split(",");
-                        Gson gson = new Gson();
-                        ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
+                byte[] message = new byte[8000];
+                DatagramPacket packet = new DatagramPacket(message, message.length);
+                registerService(udpSocket.getLocalPort());
+                while (run) {
+                    udpSocket.receive(packet);
+                    String text = new String(message, 0, packet.getLength());
+                    Log.d("Received data", text);
+                    //String [] separated = text.split(",");
+                    Gson gson = new Gson();
+                    ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
 
 
                         /*SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
@@ -192,36 +191,36 @@ public class MainActivity extends AppCompatActivity {
                             meters.add(new Meter(separated[0], Boolean.parseBoolean(separated[1]), Boolean.parseBoolean(separated[2]), Boolean.parseBoolean(separated[3]), Boolean.parseBoolean(separated[4]), separated[5], separated[6], separated[7], separated[8], separated[9], separated[10], separated[11], convertedDate));
                         }*/
 
-                        boolean found = false;
+                    boolean found = false;
 
-                        for(Meter testMeter : meters) {
-                            if(testMeter.id.equals(arrayMap.get("id"))) {
-                                testMeter.update(arrayMap);
-                                found = true;
-                            }
+                    for (Meter testMeter : meters) {
+                        if (testMeter.id.equals(arrayMap.get("id"))) {
+                            testMeter.update(arrayMap);
+                            found = true;
                         }
-
-                        if(found == false) {
-                            meters.add(new Meter(arrayMap));
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                meterAdapter.notifyDataSetChanged();
-                            }
-                        });
                     }
-                    udpSocket.close();
-                }catch (IOException e) {
-                    Log.e("TEST", "error: ", e);
-                    run = false;
+
+                    if (found == false) {
+                        meters.add(new Meter(arrayMap));
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            meterAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
-
-            }
-
-            public void close() {
+                udpSocket.close();
+            } catch (IOException e) {
+                Log.e("TEST", "error: ", e);
                 run = false;
             }
+
+        }
+
+        public void close() {
+            run = false;
+        }
     }
 }
