@@ -37,7 +37,7 @@ public class PairingActivity extends AppCompatActivity {
 
         mBluetoothName = mBluetoothAdapter.getName();
 
-        mBluetoothAdapter.setName("ZistosSmartLadderApp");
+        mBluetoothAdapter.setName("ZistosSafeAirLadderApp");
 
         txtStatus = (TextView) findViewById(R.id.txtStatus);
 
