@@ -69,13 +69,23 @@ public class MeterAdapter extends BaseAdapter {
             ConstraintLayout container = (ConstraintLayout) view.findViewById(R.id.meter_container);
 
             txtID.setText(thisMeter.id);
-            txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
-            txtRemoteBatteryLevel.setText(thisMeter.meterBatteryLevel + "%");
             txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
-            txtOxygenLevel.setText(thisMeter.oxygenLevel + "%");
-            txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel + "%");
-            txtCarbonDioxideLevel.setText(thisMeter.carbondioxideLevel + "%");
-            txtCombExLevel.setText(thisMeter.combExLevel + "%");
+            if(thisMeter.mBluetoothState) {
+                txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
+                txtRemoteBatteryLevel.setText(thisMeter.meterBatteryLevel + "%");
+                txtOxygenLevel.setText(thisMeter.oxygenLevel + "%");
+                txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel + "%");
+                txtCarbonDioxideLevel.setText(thisMeter.carbondioxideLevel + "%");
+                txtCombExLevel.setText(thisMeter.combExLevel + "%");
+            }
+            else {
+                txtTemp.setText("?");
+                txtRemoteBatteryLevel.setText("?");
+                txtOxygenLevel.setText("?");
+                txtHydrogenSulfideLevel.setText("?");
+                txtCarbonDioxideLevel.setText("?");
+                txtCombExLevel.setText("?");
+            }
             txtLastUpdate.setText(thisMeter.lastUpdate.toString());
 
             if(thisMeter.mAlarmState) {

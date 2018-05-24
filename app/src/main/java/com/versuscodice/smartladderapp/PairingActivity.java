@@ -6,14 +6,18 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import co.lujun.lmbluetoothsdk.BluetoothController;
@@ -141,14 +145,23 @@ class AcceptThread extends Thread {
             if (socket != null) {
                 // A connection was accepted. Perform work associated with
                 // the connection in a separate thread.
-                cancel();
+                //cancel();
 
                 try {
-                    String message = Name + "," + SSID + "," + Password + ",";
-                    byte [] outBuffer = message.getBytes("UTF-8");
+                    //String message = Name + "," + SSID + "," + Password + ",";
+
+                    ArrayMap<String, String> arrayMap = new ArrayMap<>();
+                    arrayMap.put("name", Name);
+                    arrayMap.put("ssid", SSID);
+                    arrayMap.put("password", Password);
+
+                    Gson gson = new Gson();
+                    String json = gson.toJson(arrayMap);
+
+                    byte [] outBuffer = json.getBytes();
                     OutputStream out = socket.getOutputStream();
                     out.write(outBuffer);
-                    Log.d("TEST", "Sent: " + new String(outBuffer, "UTF-8"));
+                    Log.d("TEST", "Sent: " + json);
 
 
                 } catch (IOException e) {

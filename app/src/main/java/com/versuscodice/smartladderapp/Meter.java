@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -76,12 +77,7 @@ public class Meter {
         mAlarmBattery = Boolean.valueOf(arrayMap.get("alarmBattery"));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
-        lastUpdate = new Date();
-        try {
-            lastUpdate = dateFormat.parse(arrayMap.get("date"));
-        } catch (NumberFormatException | ParseException e) {
-            Log.d("TEST", "Failed to Parse");
-        }
+        lastUpdate = Calendar.getInstance().getTime();
 
     }
 }
