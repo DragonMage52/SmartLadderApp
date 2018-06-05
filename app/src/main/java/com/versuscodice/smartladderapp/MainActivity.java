@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         meterAdapter = new MeterAdapter(this, meters);
         gridview.setAdapter(meterAdapter);
 
+        Meter.setContext(this, meterAdapter);
+
         mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
         udpConnect = new ClientListen();
@@ -154,42 +156,8 @@ public class MainActivity extends AppCompatActivity {
                     udpSocket.receive(packet);
                     String text = new String(message, 0, packet.getLength());
                     Log.d("Received data", text);
-                    //String [] separated = text.split(",");
                     Gson gson = new Gson();
                     ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
-
-
-                        /*SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
-                        Date convertedDate = new Date();
-                        try {
-                            convertedDate = dateFormat.parse(separated[11]);
-                        }
-                        catch(NumberFormatException | ParseException e) {
-                            Log.d("TEST", "Failed to Parse");
-                        }
-
-                        boolean found = false;
-
-                        for(Meter testMeter : meters) {
-                            if(testMeter.id.equals(separated[0])) {
-                                testMeter.wariningState = Boolean.parseBoolean(separated[1]);
-                                testMeter.alarmState = Boolean.parseBoolean(separated[2]);
-                                testMeter.ladderState = Boolean.parseBoolean(separated[3]);
-                                testMeter.manState = Boolean.parseBoolean(separated[4]);
-                                testMeter.temp = separated[5];
-                                testMeter.meterBattery = separated[6];
-                                testMeter.battery = separated[7];
-                                testMeter.oxygenLevel = separated[8];
-                                testMeter.hydrogensulfideLevel = separated[9];
-                                testMeter.carbondioxideLevel = separated[10];
-                                testMeter.combExLevel = separated[11];
-                                testMeter.lastUpdate = convertedDate;
-                                found = true;
-                            }
-                        }
-                        if(found == false) {
-                            meters.add(new Meter(separated[0], Boolean.parseBoolean(separated[1]), Boolean.parseBoolean(separated[2]), Boolean.parseBoolean(separated[3]), Boolean.parseBoolean(separated[4]), separated[5], separated[6], separated[7], separated[8], separated[9], separated[10], separated[11], convertedDate));
-                        }*/
 
                     boolean found = false;
 

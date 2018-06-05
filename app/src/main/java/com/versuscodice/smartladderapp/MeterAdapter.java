@@ -68,7 +68,64 @@ public class MeterAdapter extends BaseAdapter {
             TextView txtCombExLevel = (TextView) view.findViewById(R.id.txtCombExLevel);
             ConstraintLayout container = (ConstraintLayout) view.findViewById(R.id.meter_container);
 
+            TextView txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
+            TextView txtStaticLEL = (TextView) view.findViewById(R.id.txtStaticLEL);
+            TextView txtStaticO2 = (TextView) view.findViewById(R.id.txtStaticO2);
+            TextView txtStaticH2SO4 = (TextView) view.findViewById(R.id.txtStaticH2SO4);
+            TextView txtStaticCO = (TextView) view.findViewById(R.id.txtStaticCO);
+            TextView txtStaticMeterBattery = (TextView) view.findViewById(R.id.txtStaticMeterBattery);
+            TextView txtStaticLocalBattery = (TextView) view.findViewById(R.id.txtStaticLocalBattery);
+            TextView txtStaticLastUpdated = (TextView) view.findViewById(R.id.txtStaticLastUpdate);
+
+
             txtID.setText(thisMeter.id);
+
+            if(!thisMeter.mActive) {
+                txtLED.setText("LADDER OFF");
+                txtTemp.setVisibility(View.INVISIBLE);
+                txtStatus.setVisibility(View.INVISIBLE);
+                txtRemoteBatteryLevel.setVisibility(View.INVISIBLE);
+                txtLocalBatteryLevel.setVisibility(View.INVISIBLE);
+                txtLastUpdate.setVisibility(View.INVISIBLE);
+                txtOxygenLevel.setVisibility(View.INVISIBLE);
+                txtHydrogenSulfideLevel.setVisibility(View.INVISIBLE);
+                txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
+                txtCombExLevel.setVisibility(View.INVISIBLE);
+
+                txtStaticTemp.setVisibility(View.INVISIBLE);
+                txtStaticLEL.setVisibility(View.INVISIBLE);
+                txtStaticO2.setVisibility(View.INVISIBLE);
+                txtStaticH2SO4.setVisibility(View.INVISIBLE);
+                txtStaticCO.setVisibility(View.INVISIBLE);
+                txtStaticMeterBattery.setVisibility(View.INVISIBLE);
+                txtStaticLocalBattery.setVisibility(View.INVISIBLE);
+                txtStaticLastUpdated.setVisibility(View.INVISIBLE);
+
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
+
+                return view;
+            }
+            else {
+                txtTemp.setVisibility(View.VISIBLE);
+                txtStatus.setVisibility(View.VISIBLE);
+                txtRemoteBatteryLevel.setVisibility(View.VISIBLE);
+                txtLocalBatteryLevel.setVisibility(View.VISIBLE);
+                txtLastUpdate.setVisibility(View.VISIBLE);
+                txtOxygenLevel.setVisibility(View.VISIBLE);
+                txtHydrogenSulfideLevel.setVisibility(View.VISIBLE);
+                txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
+                txtCombExLevel.setVisibility(View.VISIBLE);
+
+                txtStaticTemp.setVisibility(View.VISIBLE);
+                txtStaticLEL.setVisibility(View.VISIBLE);
+                txtStaticO2.setVisibility(View.VISIBLE);
+                txtStaticH2SO4.setVisibility(View.VISIBLE);
+                txtStaticCO.setVisibility(View.VISIBLE);
+                txtStaticMeterBattery.setVisibility(View.VISIBLE);
+                txtStaticLocalBattery.setVisibility(View.VISIBLE);
+                txtStaticLastUpdated.setVisibility(View.VISIBLE);
+            }
+
             txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
             if(thisMeter.mBluetoothState) {
                 txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
@@ -102,10 +159,10 @@ public class MeterAdapter extends BaseAdapter {
             }
 
             if(thisMeter.mLadderState || thisMeter.mManState) {
-                txtLED.setText("ACTIVE");
+                txtLED.setText("LADDER ACTIVE");
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState){
-                txtLED.setText("IDLE");
+                txtLED.setText("LADDER IDLE");
             }
 
             if(thisMeter.mMeterState) {
@@ -133,38 +190,9 @@ public class MeterAdapter extends BaseAdapter {
                 txtStatus.setText("ENTER");
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState){
-                txtStatus.setText("IDLE");
+                txtStatus.setText("");
             }
 
-            /*if(thisMeter.alarmState) {
-                txtStatus.setText("Alarm");
-                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
-            }
-            else if(thisMeter.wariningState) {
-                txtStatus.setText("Warning");
-                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorWarning));
-            }
-            else {
-                txtStatus.setText("Enter");
-                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorGood));
-            }*/
         return view;
     }
-
-    // create a new ImageView for each item referenced by the Adapter
-    /*public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {
-            // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
-        } else {
-            imageView = (ImageView) convertView;
-        }
-
-        imageView.setImageResource(mThumbIds[position]);
-        return imageView;
-    }*/
 }

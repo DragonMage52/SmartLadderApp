@@ -1,5 +1,6 @@
 package com.versuscodice.smartladderapp;
 
+import android.os.CountDownTimer;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -43,10 +44,22 @@ public class Meter {
     boolean mAlarmMeterBattery = false;
     boolean mAlarmBattery = false;
 
+    boolean mActive = false;
+
     Date lastUpdate;
+
+    CountDownTimer mActiveTimer;
+
+    static MainActivity mThat;
+    static MeterAdapter mMeterAdapter;
 
     public Meter(ArrayMap<String, String> arrayMap) {
         update(arrayMap);
+    }
+
+    public static void setContext(MainActivity that, MeterAdapter meterAdapter) {
+        mThat = that;
+        mMeterAdapter = meterAdapter;
     }
 
     public void update(ArrayMap<String, String> arrayMap) {
@@ -79,5 +92,38 @@ public class Meter {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         lastUpdate = Calendar.getInstance().getTime();
 
+        if(mActiveTimer != null) {
+            mActiveTimer.cancel();
+        }
+
+        mThat.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateTimer();
+            }
+        });
+    }
+
+    public void updateTimer() {
+        mActiveTimer =  new CountDownTimer(10000, 5000) {
+
+            public void onTick(long millisUntilFinished) {
+                Log.d("TEST", "seconds remaining: " + millisUntilFinished/1000);
+
+            }
+
+            public void onFinish() {
+                Log.d("TEST", "Countdown Timer finished");
+                mActive = false;
+                mThat.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMeterAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }.start();
+
+        mActive = true;
     }
 }
