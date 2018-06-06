@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.rafakob.nsdhelper.NsdHelper;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ClientListen udpConnect;
     private List<Meter> meters = new ArrayList<Meter>();
     private MeterAdapter meterAdapter;
+    public TextView txtAlarms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         gridview.setAdapter(meterAdapter);
 
         Meter.setContext(this, meterAdapter);
+
+        txtAlarms = (TextView) findViewById(R.id.txtAlarms);
 
         mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
@@ -165,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
                         if (testMeter.id.equals(arrayMap.get("id"))) {
                             testMeter.update(arrayMap);
                             found = true;
+                            break;
                         }
                     }
 
@@ -176,6 +181,29 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             meterAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    boolean isAlarm = false;
+
+                    for (Meter testMeter : meters) {
+                        if (testMeter.mAlarmState && testMeter.mActive) {
+                            isAlarm = true;
+                            break;
+                        }
+                    }
+
+                    final boolean finalIsAlarm = isAlarm;
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(finalIsAlarm) {
+                                txtAlarms.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                txtAlarms.setVisibility(View.INVISIBLE);
+                            }
                         }
                     });
                 }

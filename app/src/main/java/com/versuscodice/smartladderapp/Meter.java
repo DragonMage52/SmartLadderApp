@@ -92,6 +92,8 @@ public class Meter {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         lastUpdate = Calendar.getInstance().getTime();
 
+        mActive = true;
+
         if(mActiveTimer != null) {
             mActiveTimer.cancel();
         }
@@ -123,7 +125,5 @@ public class Meter {
                 });
             }
         }.start();
-
-        mActive = true;
     }
 }
