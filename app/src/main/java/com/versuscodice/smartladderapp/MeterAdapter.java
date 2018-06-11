@@ -1,12 +1,19 @@
 package com.versuscodice.smartladderapp;
 
 import android.content.Context;
+import android.media.Image;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -21,10 +28,24 @@ import java.util.List;
 public class MeterAdapter extends BaseAdapter {
     private Context mContext;
     private List<Meter> meters = new ArrayList<Meter>();
+    private MediaPlayer mRingtone;
+    private ImageButton mBtnSilence;
 
-    public MeterAdapter(Context c, List<Meter> m) {
+    public MeterAdapter(Context c, List<Meter> m, ImageButton btnSilence) {
         mContext = c;
         meters = m;
+        mBtnSilence = btnSilence;
+
+        mBtnSilence.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                for (Meter testMeter : meters) {
+                    if(testMeter.mAlarmSilenceState == 1) {
+                        testMeter.mAlarmSilenceState = -1;
+                        notifyDataSetChanged();
+                    }
+                }
+            }
+        });
     }
 
     public int getCount() {
@@ -101,9 +122,7 @@ public class MeterAdapter extends BaseAdapter {
                 txtStaticLocalBattery.setVisibility(View.INVISIBLE);
                 txtStaticLastUpdated.setVisibility(View.INVISIBLE);
 
-                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
-
-                return view;
+                //return view;
             }
             else {
                 txtTemp.setVisibility(View.VISIBLE);
@@ -145,7 +164,10 @@ public class MeterAdapter extends BaseAdapter {
             }
             txtLastUpdate.setText(thisMeter.lastUpdate.toString());
 
-            if(thisMeter.mAlarmState) {
+            if(!thisMeter.mActive) {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
+            }
+            else if(thisMeter.mAlarmState) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
             }
             else if(thisMeter.mWarningState) {
@@ -192,6 +214,53 @@ public class MeterAdapter extends BaseAdapter {
             else if(!thisMeter.mLadderState && !thisMeter.mManState){
                 txtStatus.setText("");
             }
+
+            int totalAlarms = 0;
+            boolean playRingtone = false;
+
+        for (Meter testMeter : meters) {
+            if (testMeter.mAlarmState && testMeter.mActive) {
+                totalAlarms++;
+            }
+            if(testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                playRingtone = true;
+            }
+        }
+
+        if(mRingtone == null) {
+            mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+        }
+
+        if(playRingtone) {
+            if(!mRingtone.isPlaying()) {
+                mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+                mRingtone.start();
+            }
+            mBtnSilence.setVisibility(View.VISIBLE);
+        }
+        else {
+            if(mRingtone.isPlaying()) {
+                mRingtone.stop();
+            }
+            mBtnSilence.setVisibility(View.INVISIBLE);
+        }
+
+        final MainActivity finalThat = (MainActivity) mContext;
+
+        final int finalTotalAlarm = totalAlarms;
+
+        finalThat.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(finalTotalAlarm > 0) {
+                    finalThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
+                    finalThat.txtAlarms.setVisibility(View.VISIBLE);
+                }
+                else {
+                    finalThat.txtAlarms.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
 
         return view;
     }

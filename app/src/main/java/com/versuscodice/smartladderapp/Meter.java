@@ -1,6 +1,11 @@
 package com.versuscodice.smartladderapp;
 
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -50,6 +55,8 @@ public class Meter {
 
     CountDownTimer mActiveTimer;
 
+    int mAlarmSilenceState = 0;
+
     static MainActivity mThat;
     static MeterAdapter mMeterAdapter;
 
@@ -93,6 +100,13 @@ public class Meter {
         lastUpdate = Calendar.getInstance().getTime();
 
         mActive = true;
+
+        if(mAlarmState && mAlarmSilenceState == 0) {
+            mAlarmSilenceState = 1;
+        }
+        else if(!mAlarmState && (mAlarmSilenceState == 1 || mAlarmSilenceState == -1)) {
+            mAlarmSilenceState = 0;
+        }
 
         if(mActiveTimer != null) {
             mActiveTimer.cancel();

@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -49,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         GridView gridview = (GridView) findViewById(R.id.gridView);
-        meterAdapter = new MeterAdapter(this, meters);
+        ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
+        meterAdapter = new MeterAdapter(this, meters, btnSilence);
         gridview.setAdapter(meterAdapter);
 
         Meter.setContext(this, meterAdapter);
@@ -184,28 +186,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-                    boolean isAlarm = false;
-
-                    for (Meter testMeter : meters) {
-                        if (testMeter.mAlarmState && testMeter.mActive) {
-                            isAlarm = true;
-                            break;
-                        }
-                    }
-
-                    final boolean finalIsAlarm = isAlarm;
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(finalIsAlarm) {
-                                txtAlarms.setVisibility(View.VISIBLE);
-                            }
-                            else {
-                                txtAlarms.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    });
                 }
                 udpSocket.close();
             } catch (IOException e) {
