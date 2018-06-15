@@ -2,6 +2,7 @@ package com.versuscodice.smartladderapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
@@ -40,14 +41,32 @@ public class MainActivity extends AppCompatActivity {
     private String SERVICE_TYPE = "_http._udp";
     private NsdManager mNsdManager;
     private ClientListen udpConnect;
-    private List<Meter> meters = new ArrayList<Meter>();
+    private List<Meter> meters = new ArrayList<>();
+    private List<String> metersID = new ArrayList<>();
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
+
+    SharedPreferences mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Gson gson = new Gson();
+        mPrefs = getPreferences(MODE_PRIVATE);
+        String storedIDs = mPrefs.getString("IDs", "");
+
+        metersID = gson.fromJson(storedIDs, ArrayList.class);
+
+        for(int i = 0; i < 24 | i < metersID.size(); i++) {
+            if(i < metersID.size()) {
+
+            }
+            else {
+
+            }
+        }
 
         GridView gridview = (GridView) findViewById(R.id.gridView);
         ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
@@ -107,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         serviceInfo.setServiceType("_zvs._udp.");
         serviceInfo.setPort(port);
 
+        mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+        mNsdManager.unregisterService(mRegistrationListener);
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
 
