@@ -1,6 +1,7 @@
 package com.versuscodice.smartladderapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.nsd.NsdManager;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.ArrayMap;
@@ -17,9 +19,12 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.rafakob.nsdhelper.NsdHelper;
@@ -42,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private NsdManager mNsdManager;
     private ClientListen udpConnect;
     private List<Meter> meters = new ArrayList<>();
-    private List<String> metersID = new ArrayList<>();
+
+    private List<Meter> backgroundMeters = new ArrayList<>();
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
 
@@ -53,18 +59,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String metersID[] = new String[24];
+
         Gson gson = new Gson();
         mPrefs = getPreferences(MODE_PRIVATE);
         String storedIDs = mPrefs.getString("IDs", "");
 
-        metersID = gson.fromJson(storedIDs, ArrayList.class);
+        metersID = gson.fromJson(storedIDs, metersID.getClass());
 
-        for(int i = 0; i < 24 | i < metersID.size(); i++) {
-            if(i < metersID.size()) {
-
+        if(metersID != null) {
+            for (int i = 0; i < 24 | i < metersID.length; i++) {
+                if (i < metersID.length && metersID[i] != null) {
+                    meters.add(new Meter(metersID[i]));
+                } else {
+                    meters.add(new Meter());
+                }
             }
-            else {
-
+        }
+        else {
+            for(int i = 0; i < 24; i++) {
+                meters.add(new Meter());
             }
         }
 
@@ -76,6 +90,66 @@ public class MainActivity extends AppCompatActivity {
         Meter.setContext(this, meterAdapter);
 
         txtAlarms = (TextView) findViewById(R.id.txtAlarms);
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                final int finalSelectedMeterPosition = i;
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                final List<String> backgroundMetersID = new ArrayList<>();
+
+                for(Meter testMeter : backgroundMeters) {
+                    backgroundMetersID.add(testMeter.id);
+                }
+
+                backgroundMetersID.add("None");
+                final int finalNonePosition = backgroundMetersID.size() - 1;
+
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_selectable_list_item, backgroundMetersID);
+
+                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.d("TEST", "Selected option " + i);
+                        if(i >= finalNonePosition) {
+                            Meter meterTest = meters.get(finalSelectedMeterPosition);
+                            if(meterTest.id != null) {
+                                backgroundMeters.add(meters.get(finalSelectedMeterPosition));
+                            }
+                            meters.set(finalSelectedMeterPosition, new Meter());
+                        }
+                        else {
+                            Meter meterTemp = meters.get(finalSelectedMeterPosition);
+                            Meter backgroundMeterTemp = backgroundMeters.get(i);
+
+                            meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
+                            if(meterTemp.id != null) {
+                                backgroundMeters.set(i, meterTemp);
+                            }
+                            else {
+                                backgroundMeters.remove(i);
+                            }
+                        }
+                        meterAdapter.notifyDataSetChanged();
+                        //dialogInterface.dismiss();
+                    }
+                });
+
+                builder.setTitle("Choose a Meter");
+
+                builder.show();
+            }
+        });
 
         mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
@@ -105,6 +179,23 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d("TEST", "Failed on Pause");
         }
+
+        String metersID[] = new String[24];
+        int count = 0;
+
+        for(Meter testMeter : meters) {
+            if(testMeter.id != null) {
+                metersID[count] = testMeter.id;
+            }
+            count++;
+        }
+
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(metersID);
+        prefsEditor.putString("IDs", json);
+        prefsEditor.commit();
+
         super.onPause();
     }
 
@@ -127,8 +218,8 @@ public class MainActivity extends AppCompatActivity {
         serviceInfo.setPort(port);
 
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
-        mNsdManager.unregisterService(mRegistrationListener);
-        mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+        //mNsdManager.unregisterService(mRegistrationListener);
+        //mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
 
     private NsdManager.RegistrationListener mRegistrationListener = new NsdManager.RegistrationListener() {
@@ -189,15 +280,26 @@ public class MainActivity extends AppCompatActivity {
                     boolean found = false;
 
                     for (Meter testMeter : meters) {
-                        if (testMeter.id.equals(arrayMap.get("id"))) {
-                            testMeter.update(arrayMap);
-                            found = true;
-                            break;
+                        if (testMeter.id != null) {
+                            if (testMeter.id.equals(arrayMap.get("id"))) {
+                                testMeter.update(arrayMap);
+                                found = true;
+                            }
                         }
                     }
 
                     if (found == false) {
-                        meters.add(new Meter(arrayMap));
+                        for (Meter testMeter : backgroundMeters) {
+                            if (testMeter.id.equals(arrayMap.get("id"))) {
+                                testMeter.update(arrayMap);
+                                found = true;
+                            }
+                        }
+
+                    }
+
+                    if(found == false) {
+                        backgroundMeters.add(new Meter(arrayMap));
                     }
 
                     runOnUiThread(new Runnable() {

@@ -60,6 +60,14 @@ public class Meter {
     static MainActivity mThat;
     static MeterAdapter mMeterAdapter;
 
+    public Meter() {
+
+    }
+
+    public Meter(String mID) {
+        id = mID;
+    }
+
     public Meter(ArrayMap<String, String> arrayMap) {
         update(arrayMap);
     }
@@ -139,5 +147,10 @@ public class Meter {
                 });
             }
         }.start();
+    }
+
+    public void clearMeter() {
+        id = null;
+        mActive = false;
     }
 }

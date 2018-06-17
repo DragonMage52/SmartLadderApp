@@ -8,4 +8,5 @@
     <color name="colorGood">#33cc33</color>
     <color name="colorIdle">#ffffff</color>
     <color name="colorOff">#bfbfbf</color>
+    <color name="colorDisabled">#616161</color>
 </resources>

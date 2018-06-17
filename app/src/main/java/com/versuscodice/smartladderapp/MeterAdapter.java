@@ -31,6 +31,29 @@ public class MeterAdapter extends BaseAdapter {
     private MediaPlayer mRingtone;
     private ImageButton mBtnSilence;
 
+    TextView txtID;
+    TextView txtTemp;
+    TextView txtStatus;
+    TextView txtLED;
+    TextView txtRemoteBatteryLevel;
+    TextView txtLocalBatteryLevel;
+    TextView txtLastUpdate;
+    TextView txtOxygenLevel;
+    TextView txtHydrogenSulfideLevel;
+    TextView txtCarbonDioxideLevel;
+    TextView txtCombExLevel;
+    ConstraintLayout container;
+
+    TextView txtStaticTemp;
+    TextView txtStaticLEL;
+    TextView txtStaticO2;
+    TextView txtStaticH2SO4;
+    TextView txtStaticCO;
+    TextView txtStaticMeterBattery;
+    TextView txtStaticLocalBattery;
+    TextView txtStaticLastUpdated;
+
+
     public MeterAdapter(Context c, List<Meter> m, ImageButton btnSilence) {
         mContext = c;
         meters = m;
@@ -76,73 +99,51 @@ public class MeterAdapter extends BaseAdapter {
             view = (View) convertView;
         }
 
-            TextView txtID = (TextView) view.findViewById(R.id.txtID);
-            TextView txtTemp = (TextView) view.findViewById(R.id.txtTemp);
-            TextView txtStatus = (TextView) view.findViewById(R.id.txtStatus);
-            TextView txtLED = (TextView) view.findViewById(R.id.txtLED);
-            TextView txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
-            TextView txtLocalBatteryLevel = (TextView) view.findViewById(R.id.txtLocalBattery);
-            TextView txtLastUpdate = (TextView) view.findViewById(R.id.txtLastUpdate);
-            TextView txtOxygenLevel = (TextView) view.findViewById(R.id.txtOxygenLevel);
-            TextView txtHydrogenSulfideLevel = (TextView) view.findViewById(R.id.txtHydrogenSulfideLevel);
-            TextView txtCarbonDioxideLevel = (TextView) view.findViewById(R.id.txtCarbonDioxideLevel);
-            TextView txtCombExLevel = (TextView) view.findViewById(R.id.txtCombExLevel);
-            ConstraintLayout container = (ConstraintLayout) view.findViewById(R.id.meter_container);
+            txtID = (TextView) view.findViewById(R.id.txtID);
+            txtTemp = (TextView) view.findViewById(R.id.txtTemp);
+            txtStatus = (TextView) view.findViewById(R.id.txtStatus);
+            txtLED = (TextView) view.findViewById(R.id.txtLED);
+            txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
+            txtLocalBatteryLevel = (TextView) view.findViewById(R.id.txtLocalBattery);
+            txtLastUpdate = (TextView) view.findViewById(R.id.txtLastUpdate);
+            txtOxygenLevel = (TextView) view.findViewById(R.id.txtOxygenLevel);
+            txtHydrogenSulfideLevel = (TextView) view.findViewById(R.id.txtHydrogenSulfideLevel);
+            txtCarbonDioxideLevel = (TextView) view.findViewById(R.id.txtCarbonDioxideLevel);
+            txtCombExLevel = (TextView) view.findViewById(R.id.txtCombExLevel);
+            container = (ConstraintLayout) view.findViewById(R.id.meter_container);
 
-            TextView txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
-            TextView txtStaticLEL = (TextView) view.findViewById(R.id.txtStaticLEL);
-            TextView txtStaticO2 = (TextView) view.findViewById(R.id.txtStaticO2);
-            TextView txtStaticH2SO4 = (TextView) view.findViewById(R.id.txtStaticH2SO4);
-            TextView txtStaticCO = (TextView) view.findViewById(R.id.txtStaticCO);
-            TextView txtStaticMeterBattery = (TextView) view.findViewById(R.id.txtStaticMeterBattery);
-            TextView txtStaticLocalBattery = (TextView) view.findViewById(R.id.txtStaticLocalBattery);
-            TextView txtStaticLastUpdated = (TextView) view.findViewById(R.id.txtStaticLastUpdate);
+            txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
+            txtStaticLEL = (TextView) view.findViewById(R.id.txtStaticLEL);
+            txtStaticO2 = (TextView) view.findViewById(R.id.txtStaticO2);
+            txtStaticH2SO4 = (TextView) view.findViewById(R.id.txtStaticH2SO4);
+            txtStaticCO = (TextView) view.findViewById(R.id.txtStaticCO);
+            txtStaticMeterBattery = (TextView) view.findViewById(R.id.txtStaticMeterBattery);
+            txtStaticLocalBattery = (TextView) view.findViewById(R.id.txtStaticLocalBattery);
+            txtStaticLastUpdated = (TextView) view.findViewById(R.id.txtStaticLastUpdate);
 
 
-            txtID.setText(thisMeter.id);
 
-            if(!thisMeter.mActive) {
+            if(thisMeter.id == null) {
+                setAllInvisible();
+                txtID.setVisibility(View.INVISIBLE);
+                txtLED.setVisibility(View.INVISIBLE);
+            }
+            else if(!thisMeter.mActive) {
                 txtLED.setText("LADDER OFF");
-                txtTemp.setVisibility(View.INVISIBLE);
-                txtStatus.setVisibility(View.INVISIBLE);
-                txtRemoteBatteryLevel.setVisibility(View.INVISIBLE);
-                txtLocalBatteryLevel.setVisibility(View.INVISIBLE);
-                txtLastUpdate.setVisibility(View.INVISIBLE);
-                txtOxygenLevel.setVisibility(View.INVISIBLE);
-                txtHydrogenSulfideLevel.setVisibility(View.INVISIBLE);
-                txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
-                txtCombExLevel.setVisibility(View.INVISIBLE);
-
-                txtStaticTemp.setVisibility(View.INVISIBLE);
-                txtStaticLEL.setVisibility(View.INVISIBLE);
-                txtStaticO2.setVisibility(View.INVISIBLE);
-                txtStaticH2SO4.setVisibility(View.INVISIBLE);
-                txtStaticCO.setVisibility(View.INVISIBLE);
-                txtStaticMeterBattery.setVisibility(View.INVISIBLE);
-                txtStaticLocalBattery.setVisibility(View.INVISIBLE);
-                txtStaticLastUpdated.setVisibility(View.INVISIBLE);
-
-                //return view;
+                txtID.setVisibility(View.VISIBLE);
+                txtLED.setVisibility(View.VISIBLE);
+                setAllInvisible();
             }
             else {
-                txtTemp.setVisibility(View.VISIBLE);
-                txtStatus.setVisibility(View.VISIBLE);
-                txtRemoteBatteryLevel.setVisibility(View.VISIBLE);
-                txtLocalBatteryLevel.setVisibility(View.VISIBLE);
-                txtLastUpdate.setVisibility(View.VISIBLE);
-                txtOxygenLevel.setVisibility(View.VISIBLE);
-                txtHydrogenSulfideLevel.setVisibility(View.VISIBLE);
-                txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
-                txtCombExLevel.setVisibility(View.VISIBLE);
+                setAllVisible();
+            }
 
-                txtStaticTemp.setVisibility(View.VISIBLE);
-                txtStaticLEL.setVisibility(View.VISIBLE);
-                txtStaticO2.setVisibility(View.VISIBLE);
-                txtStaticH2SO4.setVisibility(View.VISIBLE);
-                txtStaticCO.setVisibility(View.VISIBLE);
-                txtStaticMeterBattery.setVisibility(View.VISIBLE);
-                txtStaticLocalBattery.setVisibility(View.VISIBLE);
-                txtStaticLastUpdated.setVisibility(View.VISIBLE);
+            if(thisMeter.id != null) {
+                txtID.setText(thisMeter.id);
+            }
+            else {
+                container.setBackgroundColor(mContext.getResources().getColor(R.color.colorDisabled));
+                return view;
             }
 
             txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
@@ -162,7 +163,9 @@ public class MeterAdapter extends BaseAdapter {
                 txtCarbonDioxideLevel.setText("?");
                 txtCombExLevel.setText("?");
             }
-            txtLastUpdate.setText(thisMeter.lastUpdate.toString());
+            if(thisMeter.lastUpdate != null) {
+                txtLastUpdate.setText(thisMeter.lastUpdate.toString());
+            }
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
@@ -263,5 +266,49 @@ public class MeterAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    public void setAllInvisible() {
+        txtTemp.setVisibility(View.INVISIBLE);
+        txtStatus.setVisibility(View.INVISIBLE);
+        txtRemoteBatteryLevel.setVisibility(View.INVISIBLE);
+        txtLocalBatteryLevel.setVisibility(View.INVISIBLE);
+        txtLastUpdate.setVisibility(View.INVISIBLE);
+        txtOxygenLevel.setVisibility(View.INVISIBLE);
+        txtHydrogenSulfideLevel.setVisibility(View.INVISIBLE);
+        txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
+        txtCombExLevel.setVisibility(View.INVISIBLE);
+
+        txtStaticTemp.setVisibility(View.INVISIBLE);
+        txtStaticLEL.setVisibility(View.INVISIBLE);
+        txtStaticO2.setVisibility(View.INVISIBLE);
+        txtStaticH2SO4.setVisibility(View.INVISIBLE);
+        txtStaticCO.setVisibility(View.INVISIBLE);
+        txtStaticMeterBattery.setVisibility(View.INVISIBLE);
+        txtStaticLocalBattery.setVisibility(View.INVISIBLE);
+        txtStaticLastUpdated.setVisibility(View.INVISIBLE);
+    }
+
+    public void setAllVisible() {
+        txtID.setVisibility(View.VISIBLE);
+        txtLED.setVisibility(View.VISIBLE);
+        txtTemp.setVisibility(View.VISIBLE);
+        txtStatus.setVisibility(View.VISIBLE);
+        txtRemoteBatteryLevel.setVisibility(View.VISIBLE);
+        txtLocalBatteryLevel.setVisibility(View.VISIBLE);
+        txtLastUpdate.setVisibility(View.VISIBLE);
+        txtOxygenLevel.setVisibility(View.VISIBLE);
+        txtHydrogenSulfideLevel.setVisibility(View.VISIBLE);
+        txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
+        txtCombExLevel.setVisibility(View.VISIBLE);
+
+        txtStaticTemp.setVisibility(View.VISIBLE);
+        txtStaticLEL.setVisibility(View.VISIBLE);
+        txtStaticO2.setVisibility(View.VISIBLE);
+        txtStaticH2SO4.setVisibility(View.VISIBLE);
+        txtStaticCO.setVisibility(View.VISIBLE);
+        txtStaticMeterBattery.setVisibility(View.VISIBLE);
+        txtStaticLocalBattery.setVisibility(View.VISIBLE);
+        txtStaticLastUpdated.setVisibility(View.VISIBLE);
     }
 }
