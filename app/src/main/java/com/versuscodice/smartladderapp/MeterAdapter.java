@@ -143,6 +143,7 @@ public class MeterAdapter extends BaseAdapter {
             }
             else {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorDisabled));
+                refresh();
                 return view;
             }
 
@@ -218,8 +219,14 @@ public class MeterAdapter extends BaseAdapter {
                 txtStatus.setText("");
             }
 
-            int totalAlarms = 0;
-            boolean playRingtone = false;
+            refresh();
+
+        return view;
+    }
+
+    public void refresh() {
+        int totalAlarms = 0;
+        boolean playRingtone = false;
 
         for (Meter testMeter : meters) {
             if (testMeter.mAlarmState && testMeter.mActive) {
@@ -264,8 +271,6 @@ public class MeterAdapter extends BaseAdapter {
                 }
             }
         });
-
-        return view;
     }
 
     public void setAllInvisible() {

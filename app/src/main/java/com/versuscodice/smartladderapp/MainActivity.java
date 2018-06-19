@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.MenuInflater;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         metersID = gson.fromJson(storedIDs, metersID.getClass());
 
-        if(metersID != null) {
+        if (metersID != null) {
             for (int i = 0; i < 24 | i < metersID.length; i++) {
                 if (i < metersID.length && metersID[i] != null) {
                     meters.add(new Meter(metersID[i]));
@@ -75,9 +77,8 @@ public class MainActivity extends AppCompatActivity {
                     meters.add(new Meter());
                 }
             }
-        }
-        else {
-            for(int i = 0; i < 24; i++) {
+        } else {
+            for (int i = 0; i < 24; i++) {
                 meters.add(new Meter());
             }
         }
@@ -97,57 +98,106 @@ public class MainActivity extends AppCompatActivity {
 
                 final int finalSelectedMeterPosition = i;
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                PopupMenu popup = new PopupMenu(getApplicationContext(), view);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.menu_meter, popup.getMenu());
 
-                final List<String> backgroundMetersID = new ArrayList<>();
-
-                for(Meter testMeter : backgroundMeters) {
-                    backgroundMetersID.add(testMeter.id);
-                }
-
-                backgroundMetersID.add("None");
-                final int finalNonePosition = backgroundMetersID.size() - 1;
-
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_selectable_list_item, backgroundMetersID);
-
-                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.itemChooseMeter:
+
+                                SubMenu meterMenu = menuItem.getSubMenu();
+
+                                for (Meter testMeter : backgroundMeters) {
+                                    meterMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, testMeter.id);
+                                }
+                                return true;
+
+                            case R.id.itemNone:
+                                Meter meterTest = meters.get(finalSelectedMeterPosition);
+                                if (meterTest.id != null) {
+                                    backgroundMeters.add(meters.get(finalSelectedMeterPosition));
+                                }
+                                meters.set(finalSelectedMeterPosition, new Meter());
+                                meterAdapter.notifyDataSetChanged();
+                                return true;
+
+                            case 0:
+                                for (int i = 0; i < backgroundMeters.size(); i++) {
+                                    if(menuItem.getTitle().equals(backgroundMeters.get(i).id)) {
+                                        Meter meterTemp = meters.get(finalSelectedMeterPosition);
+                                        Meter backgroundMeterTemp = backgroundMeters.get(i);
+
+                                        meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
+                                        if (meterTemp.id != null) {
+                                            backgroundMeters.set(i, meterTemp);
+                                        } else {
+                                            backgroundMeters.remove(i);
+                                        }
+                                        meterAdapter.notifyDataSetChanged();
+                                        return true;
+                                    }
+                                }
+                                break;
+
+                                /*AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                                final List<String> backgroundMetersID = new ArrayList<>();
+
+                                for (Meter testMeter : backgroundMeters) {
+                                    backgroundMetersID.add(testMeter.id);
+                                }
+
+                                backgroundMetersID.add("None");
+                                final int finalNonePosition = backgroundMetersID.size() - 1;
+
+                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_selectable_list_item, backgroundMetersID);
+
+                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+
+                                builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Log.d("TEST", "Selected option " + i);
+                                        if (i >= finalNonePosition) {
+                                            Meter meterTest = meters.get(finalSelectedMeterPosition);
+                                            if (meterTest.id != null) {
+                                                backgroundMeters.add(meters.get(finalSelectedMeterPosition));
+                                            }
+                                            meters.set(finalSelectedMeterPosition, new Meter());
+                                        } else {
+                                            Meter meterTemp = meters.get(finalSelectedMeterPosition);
+                                            Meter backgroundMeterTemp = backgroundMeters.get(i);
+
+                                            meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
+                                            if (meterTemp.id != null) {
+                                                backgroundMeters.set(i, meterTemp);
+                                            } else {
+                                                backgroundMeters.remove(i);
+                                            }
+                                        }
+                                        meterAdapter.notifyDataSetChanged();
+                                        //dialogInterface.dismiss();
+                                    }
+                                });
+
+                                builder.setTitle("Choose a Meter");
+
+                                builder.show();*/
+
+                        }
+                        return false;
                     }
                 });
 
-                builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d("TEST", "Selected option " + i);
-                        if(i >= finalNonePosition) {
-                            Meter meterTest = meters.get(finalSelectedMeterPosition);
-                            if(meterTest.id != null) {
-                                backgroundMeters.add(meters.get(finalSelectedMeterPosition));
-                            }
-                            meters.set(finalSelectedMeterPosition, new Meter());
-                        }
-                        else {
-                            Meter meterTemp = meters.get(finalSelectedMeterPosition);
-                            Meter backgroundMeterTemp = backgroundMeters.get(i);
-
-                            meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
-                            if(meterTemp.id != null) {
-                                backgroundMeters.set(i, meterTemp);
-                            }
-                            else {
-                                backgroundMeters.remove(i);
-                            }
-                        }
-                        meterAdapter.notifyDataSetChanged();
-                        //dialogInterface.dismiss();
-                    }
-                });
-
-                builder.setTitle("Choose a Meter");
-
-                builder.show();
+                popup.show();
             }
         });
 
@@ -183,8 +233,8 @@ public class MainActivity extends AppCompatActivity {
         String metersID[] = new String[24];
         int count = 0;
 
-        for(Meter testMeter : meters) {
-            if(testMeter.id != null) {
+        for (Meter testMeter : meters) {
+            if (testMeter.id != null) {
                 metersID[count] = testMeter.id;
             }
             count++;
@@ -298,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
 
-                    if(found == false) {
+                    if (found == false) {
                         backgroundMeters.add(new Meter(arrayMap));
                     }
 
