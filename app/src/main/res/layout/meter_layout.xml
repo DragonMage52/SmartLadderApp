@@ -35,26 +35,6 @@
         app:layout_constraintTop_toBottomOf="@+id/txtLED" />
 
     <TextView
-        android:id="@+id/txtStaticTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="Temp:"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
-
-    <TextView
-        android:id="@+id/txtTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="120dp"
-        android:layout_marginTop="3dp"
-        android:text="TextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
-
-    <TextView
         android:id="@+id/txtStaticLocalBattery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -154,7 +134,7 @@
         android:layout_marginTop="3dp"
         android:text="LEL:"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticTemp" />
+        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
 
     <TextView
         android:id="@+id/txtOxygenLevel"
@@ -184,7 +164,7 @@
         android:layout_marginTop="3dp"
         android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTemp" />
+        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
 
     <TextView
         android:id="@+id/txtHydrogenSulfideLevel"

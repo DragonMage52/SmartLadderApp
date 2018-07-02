@@ -32,7 +32,7 @@ public class MeterAdapter extends BaseAdapter {
     private ImageButton mBtnSilence;
 
     TextView txtID;
-    TextView txtTemp;
+    //TextView txtTemp;
     TextView txtStatus;
     TextView txtLED;
     TextView txtRemoteBatteryLevel;
@@ -44,7 +44,7 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtCombExLevel;
     ConstraintLayout container;
 
-    TextView txtStaticTemp;
+    //TextView txtStaticTemp;
     TextView txtStaticLEL;
     TextView txtStaticO2;
     TextView txtStaticH2SO4;
@@ -100,7 +100,7 @@ public class MeterAdapter extends BaseAdapter {
         }
 
             txtID = (TextView) view.findViewById(R.id.txtID);
-            txtTemp = (TextView) view.findViewById(R.id.txtTemp);
+            //txtTemp = (TextView) view.findViewById(R.id.txtTemp);
             txtStatus = (TextView) view.findViewById(R.id.txtStatus);
             txtLED = (TextView) view.findViewById(R.id.txtLED);
             txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
@@ -112,7 +112,7 @@ public class MeterAdapter extends BaseAdapter {
             txtCombExLevel = (TextView) view.findViewById(R.id.txtCombExLevel);
             container = (ConstraintLayout) view.findViewById(R.id.meter_container);
 
-            txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
+            //txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
             txtStaticLEL = (TextView) view.findViewById(R.id.txtStaticLEL);
             txtStaticO2 = (TextView) view.findViewById(R.id.txtStaticO2);
             txtStaticH2SO4 = (TextView) view.findViewById(R.id.txtStaticH2SO4);
@@ -149,7 +149,7 @@ public class MeterAdapter extends BaseAdapter {
 
             txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
             if(thisMeter.mBluetoothState) {
-                txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
+                //txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
                 txtRemoteBatteryLevel.setText(thisMeter.meterBatteryLevel + "%");
                 txtOxygenLevel.setText(thisMeter.oxygenLevel + "%");
                 txtHydrogenSulfideLevel.setText(thisMeter.hydrogensulfideLevel + "%");
@@ -157,7 +157,7 @@ public class MeterAdapter extends BaseAdapter {
                 txtCombExLevel.setText(thisMeter.combExLevel + "%");
             }
             else {
-                txtTemp.setText("?");
+                //txtTemp.setText("?");
                 txtRemoteBatteryLevel.setText("?");
                 txtOxygenLevel.setText("?");
                 txtHydrogenSulfideLevel.setText("?");
@@ -187,7 +187,7 @@ public class MeterAdapter extends BaseAdapter {
             if(thisMeter.mLadderState || thisMeter.mManState) {
                 txtLED.setText("LADDER ACTIVE");
             }
-            else if(!thisMeter.mLadderState && !thisMeter.mManState){
+            else if(!thisMeter.mLadderState && !thisMeter.mManState && thisMeter.mActive){
                 txtLED.setText("LADDER IDLE");
             }
 
@@ -274,7 +274,7 @@ public class MeterAdapter extends BaseAdapter {
     }
 
     public void setAllInvisible() {
-        txtTemp.setVisibility(View.INVISIBLE);
+        //txtTemp.setVisibility(View.INVISIBLE);
         txtStatus.setVisibility(View.INVISIBLE);
         txtRemoteBatteryLevel.setVisibility(View.INVISIBLE);
         txtLocalBatteryLevel.setVisibility(View.INVISIBLE);
@@ -284,7 +284,7 @@ public class MeterAdapter extends BaseAdapter {
         txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
         txtCombExLevel.setVisibility(View.INVISIBLE);
 
-        txtStaticTemp.setVisibility(View.INVISIBLE);
+        //txtStaticTemp.setVisibility(View.INVISIBLE);
         txtStaticLEL.setVisibility(View.INVISIBLE);
         txtStaticO2.setVisibility(View.INVISIBLE);
         txtStaticH2SO4.setVisibility(View.INVISIBLE);
@@ -297,7 +297,7 @@ public class MeterAdapter extends BaseAdapter {
     public void setAllVisible() {
         txtID.setVisibility(View.VISIBLE);
         txtLED.setVisibility(View.VISIBLE);
-        txtTemp.setVisibility(View.VISIBLE);
+        //txtTemp.setVisibility(View.VISIBLE);
         txtStatus.setVisibility(View.VISIBLE);
         txtRemoteBatteryLevel.setVisibility(View.VISIBLE);
         txtLocalBatteryLevel.setVisibility(View.VISIBLE);
@@ -307,7 +307,7 @@ public class MeterAdapter extends BaseAdapter {
         txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
         txtCombExLevel.setVisibility(View.VISIBLE);
 
-        txtStaticTemp.setVisibility(View.VISIBLE);
+        //txtStaticTemp.setVisibility(View.VISIBLE);
         txtStaticLEL.setVisibility(View.VISIBLE);
         txtStaticO2.setVisibility(View.VISIBLE);
         txtStaticH2SO4.setVisibility(View.VISIBLE);
