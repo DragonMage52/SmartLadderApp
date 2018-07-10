@@ -4,27 +4,36 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +42,16 @@ import com.rafakob.nsdhelper.NsdHelper;
 import com.rafakob.nsdhelper.NsdListener;
 import com.rafakob.nsdhelper.NsdService;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -53,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Meter> backgroundMeters = new ArrayList<>();
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
+    public GridView gridview;
 
     SharedPreferences mPrefs;
 
@@ -83,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        GridView gridview = (GridView) findViewById(R.id.gridView);
+        gridview = (GridView) findViewById(R.id.gridView);
         ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
         meterAdapter = new MeterAdapter(this, meters, btnSilence);
         gridview.setAdapter(meterAdapter);
@@ -94,13 +108,17 @@ public class MainActivity extends AppCompatActivity {
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
 
                 final int finalSelectedMeterPosition = i;
 
                 PopupMenu popup = new PopupMenu(getApplicationContext(), view);
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.menu_meter, popup.getMenu());
+
+                if (meters.get(i).mActive) {
+                    popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
+                }
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -124,9 +142,17 @@ public class MainActivity extends AppCompatActivity {
                                 meterAdapter.notifyDataSetChanged();
                                 return true;
 
+                            case 1:
+                                DatagramPacket packet = new DatagramPacket("Log".getBytes(), "Log".length());
+                                packet.setAddress(meters.get(i).mIpAddress);
+                                packet.setPort(meters.get(i).mPort);
+                                SendThread sendThread = new SendThread(packet);
+                                sendThread.start();
+                                break;
+
                             case 0:
                                 for (int i = 0; i < backgroundMeters.size(); i++) {
-                                    if(menuItem.getTitle().equals(backgroundMeters.get(i).id)) {
+                                    if (menuItem.getTitle().equals(backgroundMeters.get(i).id)) {
                                         Meter meterTemp = meters.get(finalSelectedMeterPosition);
                                         Meter backgroundMeterTemp = backgroundMeters.get(i);
 
@@ -325,39 +351,99 @@ public class MainActivity extends AppCompatActivity {
                     String text = new String(message, 0, packet.getLength());
                     Log.d("Received data", text);
                     Gson gson = new Gson();
-                    ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
+                    final ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
 
-                    boolean found = false;
+                    if (arrayMap.get("command").equals("log")) {
 
-                    for (Meter testMeter : meters) {
-                        if (testMeter.id != null) {
-                            if (testMeter.id.equals(arrayMap.get("id"))) {
-                                testMeter.update(arrayMap);
-                                found = true;
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+                        String date = dateFormat.format(Calendar.getInstance().getTime());
+
+
+                        //final String fileName = date +  arrayMap.get("id") + " events.log";
+                        final String fileName = "events.log";
+
+                        try {
+                            FileOutputStream outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+                            outputStream.write(arrayMap.get("log").getBytes());
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                View logView = layoutInflater.inflate(R.layout.popup_log, null);
+
+                                TextView txtLog = logView.findViewById(R.id.txtLog);
+                                txtLog.append(arrayMap.get("log"));
+                                DisplayMetrics displayMetrics = new DisplayMetrics();
+                                WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                                windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+
+                                final PopupWindow popupWindow = new PopupWindow(logView, displayMetrics.widthPixels - 60, displayMetrics.heightPixels - 60, true);
+                                popupWindow.showAtLocation(gridview, Gravity.CENTER, 0, 0);
+
+                                Button btnClose = logView.findViewById(R.id.btnClosePopup);
+                                btnClose.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        popupWindow.dismiss();
+                                    }
+                                });
+
+                                Button btnEmail = logView.findViewById(R.id.btnEmail);
+                                btnEmail.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent intent = new Intent(Intent.ACTION_SEND);
+                                        intent.setType("*/*");
+                                        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(fileName)));
+                                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider", new File(fileName)));
+                                        if (intent.resolveActivity(getPackageManager()) != null) {
+                                            startActivity(intent);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } else if (arrayMap.get("command").equals("update")) {
+
+                        boolean found = false;
+
+                        for (Meter testMeter : meters) {
+                            if (testMeter.id != null) {
+                                if (testMeter.id.equals(arrayMap.get("id"))) {
+                                    testMeter.update(arrayMap);
+                                    testMeter.mIpAddress = packet.getAddress();
+                                    found = true;
+                                }
                             }
                         }
-                    }
 
-                    if (found == false) {
-                        for (Meter testMeter : backgroundMeters) {
-                            if (testMeter.id.equals(arrayMap.get("id"))) {
-                                testMeter.update(arrayMap);
-                                found = true;
+                        if (found == false) {
+                            for (Meter testMeter : backgroundMeters) {
+                                if (testMeter.id.equals(arrayMap.get("id"))) {
+                                    testMeter.update(arrayMap);
+                                    testMeter.mIpAddress = packet.getAddress();
+                                    found = true;
+                                }
                             }
+
                         }
 
-                    }
-
-                    if (found == false) {
-                        backgroundMeters.add(new Meter(arrayMap));
-                    }
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            meterAdapter.notifyDataSetChanged();
+                        if (found == false) {
+                            backgroundMeters.add(new Meter(arrayMap));
                         }
-                    });
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                meterAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
 
                 }
                 udpSocket.close();
@@ -370,6 +456,25 @@ public class MainActivity extends AppCompatActivity {
 
         public void close() {
             run = false;
+        }
+    }
+
+    class SendThread extends Thread {
+
+        private DatagramPacket mPacket;
+
+        public SendThread(DatagramPacket packet) {
+            mPacket = packet;
+        }
+
+        public void run() {
+            try {
+                DatagramSocket udpSocket = new DatagramSocket();
+                udpSocket.send(mPacket);
+                udpSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

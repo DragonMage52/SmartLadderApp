@@ -5,10 +5,12 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,6 +30,8 @@ public class Meter {
     String carbondioxideLevel;
     String hydrogensulfideLevel;
     String combExLevel;
+    InetAddress mIpAddress;
+    int mPort = 0;
 
     boolean mAlarmState = false;
     boolean mWarningState = true;
@@ -54,6 +58,8 @@ public class Meter {
     Date lastUpdate;
 
     CountDownTimer mActiveTimer;
+
+    Handler mActiveHandler = new Handler();
 
     int mAlarmSilenceState = 0;
 
@@ -103,6 +109,7 @@ public class Meter {
         mAlarmMeterOff = Boolean.valueOf(arrayMap.get("alarmmeterOff"));
         mAlarmMeterBattery = Boolean.valueOf(arrayMap.get("alarmmeterBattery"));
         mAlarmBattery = Boolean.valueOf(arrayMap.get("alarmBattery"));
+        mPort = Integer.parseInt(arrayMap.get("port"));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         lastUpdate = Calendar.getInstance().getTime();
@@ -116,41 +123,22 @@ public class Meter {
             mAlarmSilenceState = 0;
         }
 
-        if(mActiveTimer != null) {
-            mActiveTimer.cancel();
+        mActiveHandler.removeCallbacks(activeRunnable);
+        mActiveHandler.postDelayed(activeRunnable, 10000);
+
+    }
+
+    public Runnable activeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mActive = false;
+            mThat.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mMeterAdapter.notifyDataSetChanged();
+                }
+            });
         }
+    };
 
-        mThat.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateTimer();
-            }
-        });
-    }
-
-    public void updateTimer() {
-        mActiveTimer =  new CountDownTimer(10000, 5000) {
-
-            public void onTick(long millisUntilFinished) {
-                Log.d("TEST", "seconds remaining: " + millisUntilFinished/1000);
-
-            }
-
-            public void onFinish() {
-                Log.d("TEST", "Countdown Timer finished");
-                mActive = false;
-                mThat.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMeterAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        }.start();
-    }
-
-    public void clearMeter() {
-        id = null;
-        mActive = false;
-    }
 }
