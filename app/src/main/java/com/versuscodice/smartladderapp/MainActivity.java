@@ -1,15 +1,20 @@
 package com.versuscodice.smartladderapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -69,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     public GridView gridview;
 
     SharedPreferences mPrefs;
+
+    public int mExternalStoragePermmisions = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,57 +174,6 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 break;
-
-                                /*AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                                final List<String> backgroundMetersID = new ArrayList<>();
-
-                                for (Meter testMeter : backgroundMeters) {
-                                    backgroundMetersID.add(testMeter.id);
-                                }
-
-                                backgroundMetersID.add("None");
-                                final int finalNonePosition = backgroundMetersID.size() - 1;
-
-                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_selectable_list_item, backgroundMetersID);
-
-                                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        dialogInterface.dismiss();
-                                    }
-                                });
-
-                                builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        Log.d("TEST", "Selected option " + i);
-                                        if (i >= finalNonePosition) {
-                                            Meter meterTest = meters.get(finalSelectedMeterPosition);
-                                            if (meterTest.id != null) {
-                                                backgroundMeters.add(meters.get(finalSelectedMeterPosition));
-                                            }
-                                            meters.set(finalSelectedMeterPosition, new Meter());
-                                        } else {
-                                            Meter meterTemp = meters.get(finalSelectedMeterPosition);
-                                            Meter backgroundMeterTemp = backgroundMeters.get(i);
-
-                                            meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
-                                            if (meterTemp.id != null) {
-                                                backgroundMeters.set(i, meterTemp);
-                                            } else {
-                                                backgroundMeters.remove(i);
-                                            }
-                                        }
-                                        meterAdapter.notifyDataSetChanged();
-                                        //dialogInterface.dismiss();
-                                    }
-                                });
-
-                                builder.setTitle("Choose a Meter");
-
-                                builder.show();*/
-
                         }
                         return false;
                     }
@@ -283,6 +239,19 @@ public class MainActivity extends AppCompatActivity {
                 udpConnect = new ClientListen();
                 udpConnect.start();
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.d("TEST","Permission: "+permissions[0]+ "was "+grantResults[0]);
+            //resume tasks needing this permission
+            mExternalStoragePermmisions = 1;
+        }
+        else {
+            mExternalStoragePermmisions = -1;
         }
     }
 
@@ -362,12 +331,22 @@ public class MainActivity extends AppCompatActivity {
                         //final String fileName = date +  arrayMap.get("id") + " events.log";
                         final String fileName = "events.log";
 
-                        try {
-                            FileOutputStream outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
-                            outputStream.write(arrayMap.get("log").getBytes());
-                            outputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        //File logDir = getApplicationContext().getDir("logs", Context.MODE_PRIVATE);
+                        File logDir = Environment.getExternalStorageDirectory();
+                        final File logFile = new File(logDir, fileName);
+
+                        if(!isStoragePermissionGranted()) {
+                            while(mExternalStoragePermmisions == 0);
+                        }
+
+                        if(mExternalStoragePermmisions == 1) {
+                            try {
+                                FileOutputStream outputStream = new FileOutputStream(logFile);
+                                outputStream.write(arrayMap.get("log").getBytes());
+                                outputStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         runOnUiThread(new Runnable() {
@@ -397,12 +376,13 @@ public class MainActivity extends AppCompatActivity {
                                 btnEmail.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(Intent.ACTION_SEND);
-                                        intent.setType("*/*");
-                                        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(fileName)));
-                                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider", new File(fileName)));
-                                        if (intent.resolveActivity(getPackageManager()) != null) {
-                                            startActivity(intent);
+                                        if (mExternalStoragePermmisions == 1) {
+                                            Intent intent = new Intent(Intent.ACTION_SEND);
+                                            intent.setType("*/*");
+                                            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "com.versuscodice.provider", logFile));
+                                            if (intent.resolveActivity(getPackageManager()) != null) {
+                                                startActivity(intent);
+                                            }
                                         }
                                     }
                                 });
@@ -456,6 +436,28 @@ public class MainActivity extends AppCompatActivity {
 
         public void close() {
             run = false;
+        }
+
+        public  boolean isStoragePermissionGranted() {
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("TEST","Permission is granted");
+                    mExternalStoragePermmisions = 1;
+                    return true;
+                } else {
+
+                    Log.d("TEST","Permission is revoked");
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    mExternalStoragePermmisions = 0;
+                    return false;
+                }
+            }
+            else { //permission is automatically granted on sdk<23 upon installation
+                Log.d("TEST","Permission is granted");
+                mExternalStoragePermmisions = 1;
+                return true;
+            }
         }
     }
 
