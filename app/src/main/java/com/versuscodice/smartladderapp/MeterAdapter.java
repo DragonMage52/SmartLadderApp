@@ -42,6 +42,7 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtHydrogenSulfideLevel;
     TextView txtCarbonDioxideLevel;
     TextView txtCombExLevel;
+    TextView txtInsertionCount;
     ConstraintLayout container;
 
     //TextView txtStaticTemp;
@@ -52,6 +53,7 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtStaticMeterBattery;
     TextView txtStaticLocalBattery;
     TextView txtStaticLastUpdated;
+    TextView txtStaticInsertionCount;
 
 
     public MeterAdapter(Context c, List<Meter> m, ImageButton btnSilence) {
@@ -96,30 +98,32 @@ public class MeterAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.meter_layout, null);
         }
         else {
-            view = (View) convertView;
+            view = convertView;
         }
 
-            txtID = (TextView) view.findViewById(R.id.txtID);
-            //txtTemp = (TextView) view.findViewById(R.id.txtTemp);
-            txtStatus = (TextView) view.findViewById(R.id.txtStatus);
-            txtLED = (TextView) view.findViewById(R.id.txtLED);
-            txtRemoteBatteryLevel = (TextView) view.findViewById(R.id.txtRemoteBatteryLevel);
-            txtLocalBatteryLevel = (TextView) view.findViewById(R.id.txtLocalBattery);
-            txtLastUpdate = (TextView) view.findViewById(R.id.txtLastUpdate);
-            txtOxygenLevel = (TextView) view.findViewById(R.id.txtOxygenLevel);
-            txtHydrogenSulfideLevel = (TextView) view.findViewById(R.id.txtHydrogenSulfideLevel);
-            txtCarbonDioxideLevel = (TextView) view.findViewById(R.id.txtCarbonDioxideLevel);
-            txtCombExLevel = (TextView) view.findViewById(R.id.txtCombExLevel);
-            container = (ConstraintLayout) view.findViewById(R.id.meter_container);
+            txtID = view.findViewById(R.id.txtID);
+            //txtTemp = view.findViewById(R.id.txtTemp);
+            txtStatus = view.findViewById(R.id.txtStatus);
+            txtLED = view.findViewById(R.id.txtLED);
+            txtRemoteBatteryLevel = view.findViewById(R.id.txtRemoteBatteryLevel);
+            txtLocalBatteryLevel = view.findViewById(R.id.txtLocalBattery);
+            txtLastUpdate = view.findViewById(R.id.txtLastUpdate);
+            txtOxygenLevel = view.findViewById(R.id.txtOxygenLevel);
+            txtHydrogenSulfideLevel = view.findViewById(R.id.txtHydrogenSulfideLevel);
+            txtCarbonDioxideLevel = view.findViewById(R.id.txtCarbonDioxideLevel);
+            txtCombExLevel = view.findViewById(R.id.txtCombExLevel);
+            txtInsertionCount = view.findViewById(R.id.txtInsertionCount);
+            container = view.findViewById(R.id.meter_container);
 
-            //txtStaticTemp = (TextView) view.findViewById(R.id.txtStaticTemp);
-            txtStaticLEL = (TextView) view.findViewById(R.id.txtStaticLEL);
-            txtStaticO2 = (TextView) view.findViewById(R.id.txtStaticO2);
-            txtStaticH2SO4 = (TextView) view.findViewById(R.id.txtStaticH2SO4);
-            txtStaticCO = (TextView) view.findViewById(R.id.txtStaticCO);
-            txtStaticMeterBattery = (TextView) view.findViewById(R.id.txtStaticMeterBattery);
-            txtStaticLocalBattery = (TextView) view.findViewById(R.id.txtStaticLocalBattery);
-            txtStaticLastUpdated = (TextView) view.findViewById(R.id.txtStaticLastUpdate);
+            //txtStaticTemp = view.findViewById(R.id.txtStaticTemp);
+            txtStaticLEL = view.findViewById(R.id.txtStaticLEL);
+            txtStaticO2 = view.findViewById(R.id.txtStaticO2);
+            txtStaticH2SO4 = view.findViewById(R.id.txtStaticH2SO4);
+            txtStaticCO = view.findViewById(R.id.txtStaticCO);
+            txtStaticMeterBattery = view.findViewById(R.id.txtStaticMeterBattery);
+            txtStaticLocalBattery = view.findViewById(R.id.txtStaticLocalBattery);
+            txtStaticLastUpdated = view.findViewById(R.id.txtStaticLastUpdate);
+            txtStaticInsertionCount = view.findViewById(R.id.txtStaticInsertionCount);
 
 
 
@@ -167,6 +171,8 @@ public class MeterAdapter extends BaseAdapter {
             if(thisMeter.lastUpdate != null) {
                 txtLastUpdate.setText(thisMeter.lastUpdate.toString());
             }
+
+            txtInsertionCount.setText(thisMeter.mInsertionCount);
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
@@ -283,6 +289,7 @@ public class MeterAdapter extends BaseAdapter {
         txtHydrogenSulfideLevel.setVisibility(View.INVISIBLE);
         txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
         txtCombExLevel.setVisibility(View.INVISIBLE);
+        txtInsertionCount.setVisibility(View.INVISIBLE);
 
         //txtStaticTemp.setVisibility(View.INVISIBLE);
         txtStaticLEL.setVisibility(View.INVISIBLE);
@@ -292,6 +299,7 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticMeterBattery.setVisibility(View.INVISIBLE);
         txtStaticLocalBattery.setVisibility(View.INVISIBLE);
         txtStaticLastUpdated.setVisibility(View.INVISIBLE);
+        txtStaticInsertionCount.setVisibility(View.INVISIBLE);
     }
 
     public void setAllVisible() {
@@ -306,6 +314,7 @@ public class MeterAdapter extends BaseAdapter {
         txtHydrogenSulfideLevel.setVisibility(View.VISIBLE);
         txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
         txtCombExLevel.setVisibility(View.VISIBLE);
+        txtInsertionCount.setVisibility(View.VISIBLE);
 
         //txtStaticTemp.setVisibility(View.VISIBLE);
         txtStaticLEL.setVisibility(View.VISIBLE);
@@ -315,5 +324,6 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticMeterBattery.setVisibility(View.VISIBLE);
         txtStaticLocalBattery.setVisibility(View.VISIBLE);
         txtStaticLastUpdated.setVisibility(View.VISIBLE);
+        txtStaticInsertionCount.setVisibility(View.VISIBLE);
     }
 }
