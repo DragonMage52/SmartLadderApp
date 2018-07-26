@@ -129,11 +129,16 @@ public class MainActivity extends AppCompatActivity {
 
                 if (meters.get(i).mActive) {
                     popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
+                    popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
                 }
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
+
+                        DatagramPacket packet;
+                        SendThread sendThread;
+
                         switch (menuItem.getItemId()) {
                             case R.id.itemChooseMeter:
 
@@ -153,11 +158,19 @@ public class MainActivity extends AppCompatActivity {
                                 meterAdapter.notifyDataSetChanged();
                                 return true;
 
-                            case 1:
-                                DatagramPacket packet = new DatagramPacket("Log".getBytes(), "Log".length());
+                            case 2:
+                                packet = new DatagramPacket("Insertion".getBytes(), "Insertion".length());
                                 packet.setAddress(meters.get(i).mIpAddress);
                                 packet.setPort(meters.get(i).mPort);
-                                SendThread sendThread = new SendThread(packet);
+                                sendThread = new SendThread(packet);
+                                sendThread.start();
+                                break;
+
+                            case 1:
+                                packet = new DatagramPacket("Log".getBytes(), "Log".length());
+                                packet.setAddress(meters.get(i).mIpAddress);
+                                packet.setPort(meters.get(i).mPort);
+                                sendThread = new SendThread(packet);
                                 sendThread.start();
                                 break;
 

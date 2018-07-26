@@ -172,7 +172,7 @@ public class MeterAdapter extends BaseAdapter {
                 txtLastUpdate.setText(thisMeter.lastUpdate.toString());
             }
 
-            txtInsertionCount.setText(thisMeter.mInsertionCount);
+            txtInsertionCount.setText(thisMeter.mInsertionCount + "");
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
