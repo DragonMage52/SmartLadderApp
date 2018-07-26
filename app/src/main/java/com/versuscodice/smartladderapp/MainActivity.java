@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -52,6 +53,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
     public GridView gridview;
+    public WifiManager.MulticastLock mMulticastLock;
 
     SharedPreferences mPrefs;
 
@@ -183,7 +187,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
+        //mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
+
+        WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        mMulticastLock = wifiManager.createMulticastLock("com.zistos");
+        mMulticastLock.acquire();
 
         udpConnect = new ClientListen();
         udpConnect.start();
@@ -228,6 +236,8 @@ public class MainActivity extends AppCompatActivity {
         prefsEditor.putString("IDs", json);
         prefsEditor.commit();
 
+        mMulticastLock.release();
+
         super.onPause();
     }
 
@@ -240,6 +250,8 @@ public class MainActivity extends AppCompatActivity {
                 udpConnect.start();
             }
         }
+        mMulticastLock.acquire();
+
     }
 
     @Override
@@ -310,13 +322,18 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 run = true;
+                MulticastSocket socket = new MulticastSocket(52867);
+                InetAddress group = InetAddress.getByName("239.52.8.234");
+                socket.joinGroup(group);
+
                 DatagramSocket udpSocket = new DatagramSocket();
 
                 byte[] message = new byte[8000];
                 DatagramPacket packet = new DatagramPacket(message, message.length);
-                registerService(udpSocket.getLocalPort());
+                //registerService(udpSocket.getLocalPort());
                 while (run) {
-                    udpSocket.receive(packet);
+                    //udpSocket.receive(packet);
+                    socket.receive(packet);
                     String text = new String(message, 0, packet.getLength());
                     Log.d("Received data", text);
                     Gson gson = new Gson();
