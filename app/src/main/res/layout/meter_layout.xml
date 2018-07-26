@@ -77,13 +77,13 @@
     <TextView
         android:id="@+id/txtStaticLastUpdate"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="13dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="6dp"
         android:text="Last Updated:"
         android:textSize="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticLocalBattery" />
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticInsertionCount" />
 
     <TextView
         android:id="@+id/txtLastUpdate"
@@ -188,5 +188,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtID" />
+
+    <TextView
+        android:id="@+id/txtStaticInsertionCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="Insertion Count:"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticLocalBattery" />
+
+    <TextView
+        android:id="@+id/txtInsertionCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="120dp"
+        android:layout_marginTop="3dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtLocalBattery" />
 
 </android.support.constraint.ConstraintLayout>

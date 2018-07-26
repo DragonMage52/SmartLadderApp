@@ -63,6 +63,8 @@ public class Meter {
 
     int mAlarmSilenceState = 0;
 
+    int mInsertionCount = 0;
+
     static MainActivity mThat;
     static MeterAdapter mMeterAdapter;
 
@@ -110,6 +112,7 @@ public class Meter {
         mAlarmMeterBattery = Boolean.valueOf(arrayMap.get("alarmmeterBattery"));
         mAlarmBattery = Boolean.valueOf(arrayMap.get("alarmBattery"));
         mPort = Integer.parseInt(arrayMap.get("port"));
+        mInsertionCount = Integer.parseInt(arrayMap.get("insertion"));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         lastUpdate = Calendar.getInstance().getTime();
