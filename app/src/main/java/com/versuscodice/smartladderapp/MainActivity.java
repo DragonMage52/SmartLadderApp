@@ -13,6 +13,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +22,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -75,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
     public GridView gridview;
-    public WifiManager.MulticastLock mMulticastLock;
+    public Handler mMulticastSendHandler = new Handler();
 
     SharedPreferences mPrefs;
 
@@ -202,10 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
         //mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
-        WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        mMulticastLock = wifiManager.createMulticastLock("com.zistos");
-        mMulticastLock.acquire();
-
         udpConnect = new ClientListen();
         udpConnect.start();
     }
@@ -249,8 +247,6 @@ public class MainActivity extends AppCompatActivity {
         prefsEditor.putString("IDs", json);
         prefsEditor.commit();
 
-        mMulticastLock.release();
-
         super.onPause();
     }
 
@@ -263,8 +259,6 @@ public class MainActivity extends AppCompatActivity {
                 udpConnect.start();
             }
         }
-        mMulticastLock.acquire();
-
     }
 
     @Override
@@ -335,9 +329,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 run = true;
-                MulticastSocket socket = new MulticastSocket(52867);
-                InetAddress group = InetAddress.getByName("239.52.8.234");
-                socket.joinGroup(group);
+
 
                 DatagramSocket udpSocket = new DatagramSocket();
 
@@ -345,8 +337,8 @@ public class MainActivity extends AppCompatActivity {
                 DatagramPacket packet = new DatagramPacket(message, message.length);
                 //registerService(udpSocket.getLocalPort());
                 while (run) {
-                    //udpSocket.receive(packet);
-                    socket.receive(packet);
+                    udpSocket.receive(packet);
+                    //socket.receive(packet);
                     String text = new String(message, 0, packet.getLength());
                     Log.d("Received data", text);
                     Gson gson = new Gson();
@@ -467,6 +459,24 @@ public class MainActivity extends AppCompatActivity {
         public void close() {
             run = false;
         }
+
+        public Runnable multicastSend = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                    String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                    byte[] message = (ip + ",").getBytes();
+                    InetAddress group = InetAddress.getByName("239.52.8.234");
+                    DatagramPacket packet = new DatagramPacket(message, message.length, group, 52867);
+                    SendThread sendThread = new SendThread(packet);
+                    sendThread.start();
+
+                } catch (IOException e) {
+                    Log.e("multicastSend", "Failed to send");
+                }
+            }
+        };
 
         public  boolean isStoragePermissionGranted() {
             if (Build.VERSION.SDK_INT >= 23) {
