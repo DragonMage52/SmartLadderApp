@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
     public TextView txtAlarms;
     public GridView gridview;
     public Handler mMulticastSendHandler = new Handler();
+    public DatagramSocket udpSocket;
+    public int mListenPort;
+    public boolean mBackground = true;
 
     SharedPreferences mPrefs;
 
@@ -204,9 +207,31 @@ public class MainActivity extends AppCompatActivity {
 
         //mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
+        mMulticastSendHandler.post(multicastSendRunnable);
         udpConnect = new ClientListen();
         udpConnect.start();
     }
+
+    public Runnable multicastSendRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                byte[] message = (ip + "," + mListenPort).getBytes();
+                InetAddress group = InetAddress.getByName("239.52.8.234");
+                DatagramPacket packet = new DatagramPacket(message, message.length, group, 52867);
+                SendThread sendThread = new SendThread(packet);
+                sendThread.start();
+                if(mBackground) {
+                    mMulticastSendHandler.postDelayed(multicastSendRunnable, 10000);
+                }
+
+            } catch (IOException e) {
+                Log.e("multicastSend", "Failed to send");
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,11 +250,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         try {
-            mNsdManager.unregisterService(mRegistrationListener);
+            //mNsdManager.unregisterService(mRegistrationListener);
             udpConnect.close();
+            mBackground = false;
         } catch (Exception e) {
             Log.d("TEST", "Failed on Pause");
         }
+
+        mMulticastSendHandler.removeCallbacks(multicastSendRunnable);
 
         String metersID[] = new String[24];
         int count = 0;
@@ -259,6 +287,8 @@ public class MainActivity extends AppCompatActivity {
                 udpConnect.start();
             }
         }
+        mBackground = true;
+        mMulticastSendHandler.post(multicastSendRunnable);
     }
 
     @Override
@@ -331,10 +361,11 @@ public class MainActivity extends AppCompatActivity {
                 run = true;
 
 
-                DatagramSocket udpSocket = new DatagramSocket();
+                udpSocket = new DatagramSocket();
 
                 byte[] message = new byte[8000];
                 DatagramPacket packet = new DatagramPacket(message, message.length);
+                mListenPort = udpSocket.getLocalPort();
                 //registerService(udpSocket.getLocalPort());
                 while (run) {
                     udpSocket.receive(packet);
@@ -436,7 +467,12 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         if (found == false) {
-                            backgroundMeters.add(new Meter(arrayMap));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    backgroundMeters.add(new Meter(arrayMap));
+                                }
+                            });
                         }
 
                         runOnUiThread(new Runnable() {
@@ -451,6 +487,7 @@ public class MainActivity extends AppCompatActivity {
                 udpSocket.close();
             } catch (IOException e) {
                 Log.e("TEST", "error: ", e);
+                udpSocket.close();
                 run = false;
             }
 
@@ -460,23 +497,7 @@ public class MainActivity extends AppCompatActivity {
             run = false;
         }
 
-        public Runnable multicastSend = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                    String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                    byte[] message = (ip + ",").getBytes();
-                    InetAddress group = InetAddress.getByName("239.52.8.234");
-                    DatagramPacket packet = new DatagramPacket(message, message.length, group, 52867);
-                    SendThread sendThread = new SendThread(packet);
-                    sendThread.start();
 
-                } catch (IOException e) {
-                    Log.e("multicastSend", "Failed to send");
-                }
-            }
-        };
 
         public  boolean isStoragePermissionGranted() {
             if (Build.VERSION.SDK_INT >= 23) {
