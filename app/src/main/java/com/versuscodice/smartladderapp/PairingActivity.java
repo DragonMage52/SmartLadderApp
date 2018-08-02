@@ -51,7 +51,7 @@ public class PairingActivity extends AppCompatActivity {
         btnPair.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 10);
+                discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 30);
                 startActivityForResult(discoverableIntent, 1);
 
                 TextView txtSSID = (TextView) findViewById(R.id.edittxtSSID);
