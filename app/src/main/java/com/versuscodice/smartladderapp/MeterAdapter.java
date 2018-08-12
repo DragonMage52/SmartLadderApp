@@ -12,8 +12,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -54,6 +60,7 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtStaticLocalBattery;
     TextView txtStaticLastUpdated;
     TextView txtStaticInsertionCount;
+    ImageView imgSync;
 
 
     public MeterAdapter(Context c, List<Meter> m, ImageButton btnSilence) {
@@ -124,6 +131,7 @@ public class MeterAdapter extends BaseAdapter {
             txtStaticLocalBattery = view.findViewById(R.id.txtStaticLocalBattery);
             txtStaticLastUpdated = view.findViewById(R.id.txtStaticLastUpdate);
             txtStaticInsertionCount = view.findViewById(R.id.txtStaticInsertionCount);
+            imgSync = view.findViewById(R.id.imgSync);
 
 
 
@@ -173,6 +181,26 @@ public class MeterAdapter extends BaseAdapter {
             }
 
             txtInsertionCount.setText(thisMeter.mInsertionCount + "");
+
+            if(thisMeter.mActive) {
+                AnimationSet animationSet = new AnimationSet(false);
+                Animation alphaAnimation = new AlphaAnimation(0, 1f);
+                alphaAnimation.setDuration(750);
+                alphaAnimation.setInterpolator(new LinearInterpolator());
+                alphaAnimation.setRepeatCount(1);
+                alphaAnimation.setRepeatMode(Animation.REVERSE);
+                alphaAnimation.setFillAfter(true);
+
+                Animation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF,  .5f);
+                rotateAnimation.setDuration(1000);
+                rotateAnimation.setInterpolator(new LinearInterpolator());
+
+                animationSet.setFillAfter(true);
+
+                animationSet.addAnimation(alphaAnimation);
+                animationSet.addAnimation(rotateAnimation);
+                imgSync.startAnimation(animationSet);
+            }
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
@@ -300,6 +328,7 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticLocalBattery.setVisibility(View.INVISIBLE);
         txtStaticLastUpdated.setVisibility(View.INVISIBLE);
         txtStaticInsertionCount.setVisibility(View.INVISIBLE);
+        imgSync.setVisibility(View.INVISIBLE);
     }
 
     public void setAllVisible() {
@@ -325,5 +354,6 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticLocalBattery.setVisibility(View.VISIBLE);
         txtStaticLastUpdated.setVisibility(View.VISIBLE);
         txtStaticInsertionCount.setVisibility(View.VISIBLE);
+        imgSync.setVisibility(View.VISIBLE);
     }
 }
