@@ -101,11 +101,12 @@ public class MeterAdapter extends BaseAdapter {
 
         View view;
         if(convertView == null) {
-            view = new View(mContext);
             view = inflater.inflate(R.layout.meter_layout, null);
         }
         else {
             view = convertView;
+            imgSync = view.findViewById(R.id.imgSync);
+            imgSync.clearAnimation();
         }
 
             txtID = view.findViewById(R.id.txtID);
@@ -132,8 +133,6 @@ public class MeterAdapter extends BaseAdapter {
             txtStaticLastUpdated = view.findViewById(R.id.txtStaticLastUpdate);
             txtStaticInsertionCount = view.findViewById(R.id.txtStaticInsertionCount);
             imgSync = view.findViewById(R.id.imgSync);
-
-
 
             if(thisMeter.id == null) {
                 setAllInvisible();
@@ -261,50 +260,50 @@ public class MeterAdapter extends BaseAdapter {
     public void refresh() {
         int totalAlarms = 0;
         boolean playRingtone = false;
-
-        for (Meter testMeter : meters) {
-            if (testMeter.mAlarmState && testMeter.mActive) {
-                totalAlarms++;
-            }
-            if(testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
-                playRingtone = true;
-            }
-        }
-
-        if(mRingtone == null) {
-            mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
-        }
-
-        if(playRingtone) {
-            if(!mRingtone.isPlaying()) {
-                mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
-                mRingtone.start();
-            }
-            mBtnSilence.setVisibility(View.VISIBLE);
-        }
-        else {
-            if(mRingtone.isPlaying()) {
-                mRingtone.stop();
-            }
-            mBtnSilence.setVisibility(View.INVISIBLE);
-        }
-
         final MainActivity finalThat = (MainActivity) mContext;
 
-        final int finalTotalAlarm = totalAlarms;
+        if(finalThat.connectedToWifi) {
 
-        finalThat.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(finalTotalAlarm > 0) {
-                    finalThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
-                    finalThat.txtAlarms.setVisibility(View.VISIBLE);
+            for (Meter testMeter : meters) {
+                if (testMeter.mAlarmState && testMeter.mActive) {
+                    totalAlarms++;
                 }
-                else {
-                    finalThat.txtAlarms.setVisibility(View.INVISIBLE);
+                if (testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                    playRingtone = true;
                 }
             }
-        });
+
+            if (mRingtone == null) {
+                mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+            }
+
+            if (playRingtone) {
+                if (!mRingtone.isPlaying()) {
+                    mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+                    mRingtone.start();
+                }
+                mBtnSilence.setVisibility(View.VISIBLE);
+            } else {
+                if (mRingtone.isPlaying()) {
+                    mRingtone.stop();
+                }
+                mBtnSilence.setVisibility(View.INVISIBLE);
+            }
+
+            final int finalTotalAlarm = totalAlarms;
+
+            finalThat.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (finalTotalAlarm > 0) {
+                        finalThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
+                        finalThat.txtAlarms.setVisibility(View.VISIBLE);
+                    } else {
+                        finalThat.txtAlarms.setVisibility(View.INVISIBLE);
+                    }
+                }
+            });
+        }
     }
 
     public void setAllInvisible() {

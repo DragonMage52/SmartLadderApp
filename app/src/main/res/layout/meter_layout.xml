@@ -16,6 +16,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,6 +30,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,6 +43,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Ladder Battery:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticMeterBattery" />
 
@@ -51,6 +54,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Meter Battery:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticCO" />
 
@@ -61,6 +65,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtRemoteBatteryLevel" />
 
@@ -81,6 +86,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="6dp"
         android:text="Last Updated:"
+        android:textColor="@color/colorBackground"
         android:textSize="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticInsertionCount" />
@@ -92,6 +98,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         android:textSize="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticLastUpdate" />
@@ -103,6 +110,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="02:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticLEL" />
 
@@ -113,6 +121,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="H2S:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticO2" />
 
@@ -123,6 +132,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="CO:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticH2SO4" />
 
@@ -133,6 +143,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="LEL:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
 
@@ -143,6 +154,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCombExLevel" />
 
@@ -153,6 +165,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtHydrogenSulfideLevel" />
 
@@ -163,6 +176,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
 
@@ -173,6 +187,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtOxygenLevel" />
 
@@ -184,6 +199,7 @@
         android:layout_marginStart="25dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -196,6 +212,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Insertion Count:"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticLocalBattery" />
 
@@ -206,6 +223,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtLocalBattery" />
 

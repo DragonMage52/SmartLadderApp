@@ -1,19 +1,25 @@
 package com.versuscodice.smartladderapp;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -65,7 +71,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
     private String SERVICE_NAME = "Smart Ladder";
     private String SERVICE_TYPE = "_http._udp";
@@ -86,10 +92,19 @@ public class MainActivity extends AppCompatActivity {
 
     public int mExternalStoragePermmisions = 0;
 
+    String mSSID;
+    boolean connectedToWifi = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        setTheme(R.style.AppTheme);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mSSID = sharedPref.getString("perf_appWifiSSID", "");
 
         String metersID[] = new String[24];
 
@@ -207,6 +222,16 @@ public class MainActivity extends AppCompatActivity {
 
         //mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.wifi.STATE_CHANGE");
+        registerReceiver(wifiReceiver, intentFilter);
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (networkInfo.isConnected()) {
+            checkWifiState();
+        }
+
         mMulticastSendHandler.post(multicastSendRunnable);
         udpConnect = new ClientListen();
         udpConnect.start();
@@ -232,6 +257,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    private final BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if(action.equals("android.net.wifi.STATE_CHANGE")) {
+                checkWifiState();
+            }
+        }
+    };
+
+    public void checkWifiState() {
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService (Context.WIFI_SERVICE);
+        WifiInfo info = wifiManager.getConnectionInfo ();
+        String ssid = info.getSSID().replace("\"", "");
+        Log.d("TEST", "SSID = " + ssid);
+        if (ssid.equals(mSSID)) {
+            connectedToWifi = true;
+            meterAdapter.refresh();
+        }
+        else {
+            connectedToWifi = false;
+            txtAlarms.setText("ALARM-NETWORK-ERROR");
+            txtAlarms.setVisibility(View.VISIBLE);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -275,6 +326,8 @@ public class MainActivity extends AppCompatActivity {
         prefsEditor.putString("IDs", json);
         prefsEditor.commit();
 
+        unregisterReceiver(wifiReceiver);
+
         super.onPause();
     }
 
@@ -286,6 +339,11 @@ public class MainActivity extends AppCompatActivity {
                 udpConnect = new ClientListen();
                 udpConnect.start();
             }
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction("android.net.wifi.STATE_CHANGE");
+            registerReceiver(wifiReceiver, intentFilter);
+
+            checkWifiState();
         }
         mBackground = true;
         mMulticastSendHandler.post(multicastSendRunnable);
@@ -344,8 +402,13 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.actParing:
-                Intent intent = new Intent(this, PairingActivity.class);
-                startActivity(intent);
+                Intent pairingIntent = new Intent(this, PairingActivity.class);
+                startActivity(pairingIntent);
+                return true;
+
+            case R.id.actSetting:
+                Intent settingIntents = new Intent(this, SettingsActivity.class);
+                startActivity(settingIntents);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

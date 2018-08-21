@@ -6,4 +6,9 @@
         android:id="@+id/actParing"
         android:orderInCategory="100"
         android:title="Ladder Pairing" />
+
+    <item
+        android:id="@+id/actSetting"
+        android:orderInCategory="100"
+        android:title="Settings" />
 </menu>
