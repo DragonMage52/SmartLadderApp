@@ -1,6 +1,7 @@
 package com.versuscodice.smartladderapp;
 
 import android.Manifest;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity  {
     private String SERVICE_TYPE = "_http._udp";
     private NsdManager mNsdManager;
     private ClientListen udpConnect;
-    private List<Meter> meters = new ArrayList<>();
+    private List<Meter> meters;
 
     private List<Meter> backgroundMeters = new ArrayList<>();
     private MeterAdapter meterAdapter;
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity  {
     public DatagramSocket udpSocket;
     public int mListenPort;
     public boolean mBackground = true;
+    public GridViewModel mModel;
 
     SharedPreferences mPrefs;
 
@@ -106,29 +109,40 @@ public class MainActivity extends AppCompatActivity  {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
 
+        mModel = ViewModelProviders.of(this).get(GridViewModel.class);
+        meters = mModel.getMeterList();
+
         String metersID[] = new String[24];
 
         Gson gson = new Gson();
         mPrefs = getPreferences(MODE_PRIVATE);
         String storedIDs = mPrefs.getString("IDs", "");
 
-        metersID = gson.fromJson(storedIDs, metersID.getClass());
+        if(meters.size() < 1) {
+            metersID = gson.fromJson(storedIDs, metersID.getClass());
 
-        if (metersID != null) {
-            for (int i = 0; i < 24 | i < metersID.length; i++) {
-                if (i < metersID.length && metersID[i] != null) {
-                    meters.add(new Meter(metersID[i]));
-                } else {
+            if (metersID != null) {
+                for (int i = 0; i < 24 | i < metersID.length; i++) {
+                    if (i < metersID.length && metersID[i] != null) {
+                        meters.add(new Meter(metersID[i]));
+                    } else {
+                        meters.add(new Meter());
+                    }
+                }
+            } else {
+                for (int i = 0; i < 24; i++) {
                     meters.add(new Meter());
                 }
-            }
-        } else {
-            for (int i = 0; i < 24; i++) {
-                meters.add(new Meter());
             }
         }
 
         gridview = (GridView) findViewById(R.id.gridView);
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            gridview.setNumColumns(4);
+        } else {
+            gridview.setNumColumns(2);
+        }
         ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
         meterAdapter = new MeterAdapter(this, meters, btnSilence);
         gridview.setAdapter(meterAdapter);

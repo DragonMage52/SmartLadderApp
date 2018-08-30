@@ -76,6 +76,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCarbonDioxideLevel" />
 
@@ -83,7 +84,7 @@
         android:id="@+id/txtStaticLastUpdate"
         android:layout_width="wrap_content"
         android:layout_height="13dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="6dp"
         android:text="Last Updated:"
         android:textColor="@color/colorBackground"
@@ -95,7 +96,7 @@
         android:id="@+id/txtLastUpdate"
         android:layout_width="wrap_content"
         android:layout_height="13dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textColor="@color/colorBackground"
@@ -236,5 +237,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_popup_sync" />
+
+    <TextView
+        android:id="@+id/txtStaticVersion"
+        android:layout_width="19dp"
+        android:layout_height="11dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="6dp"
+        android:text="Ver."
+        android:textColor="@color/colorBackground"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toStartOf="@+id/txtVersion"
+        app:layout_constraintTop_toBottomOf="@+id/txtInsertionCount" />
+
+    <TextView
+        android:id="@+id/txtVersion"
+        android:layout_width="19dp"
+        android:layout_height="11dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="6dp"
+        android:text="1.0"
+        android:textColor="@color/colorBackground"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtInsertionCount" />
 
 </android.support.constraint.ConstraintLayout>

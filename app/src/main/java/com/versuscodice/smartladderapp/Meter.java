@@ -30,6 +30,7 @@ public class Meter {
     String carbondioxideLevel;
     String hydrogensulfideLevel;
     String combExLevel;
+    String version;
     InetAddress mIpAddress;
     int mPort = 0;
 
@@ -113,6 +114,7 @@ public class Meter {
         mAlarmBattery = Boolean.valueOf(arrayMap.get("alarmBattery"));
         mPort = Integer.parseInt(arrayMap.get("port"));
         mInsertionCount = Integer.parseInt(arrayMap.get("insertion"));
+        version = arrayMap.get("version");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         lastUpdate = Calendar.getInstance().getTime();
@@ -127,7 +129,7 @@ public class Meter {
         }
 
         mActiveHandler.removeCallbacks(activeRunnable);
-        mActiveHandler.postDelayed(activeRunnable, 10000);
+        mActiveHandler.postDelayed(activeRunnable, 15000);
 
     }
 
