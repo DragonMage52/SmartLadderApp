@@ -158,7 +158,7 @@ public class Meter {
     };
 
     public boolean isCalibrated() {
-        if(mLastCalibration != null) {
+        if(mLastCalibration != null && mThat.mCalibrationReminder != 0) {
             if ((new Date().getTime() - mLastCalibration.getTime()) > (mThat.mCalibrationReminder * 86400000)) {
                 return false;
             } else {

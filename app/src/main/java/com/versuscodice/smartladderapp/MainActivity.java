@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity  {
 
     int mCalibrationReminder;
 
+    int mAlarmSetting;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -110,6 +112,7 @@ public class MainActivity extends AppCompatActivity  {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
+        mAlarmSetting = Integer.parseInt(sharedPref.getString("pref_appAlarm", "0"));
         mCalibrationReminder = NumberPickerPreference.value;
 
         mModel = ViewModelProviders.of(this).get(GridViewModel.class);
@@ -360,6 +363,7 @@ public class MainActivity extends AppCompatActivity  {
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             mSSID = sharedPref.getString("perf_appWifiSSID", "");
+            mAlarmSetting = Integer.parseInt(sharedPref.getString("perf_appAlarm", "0"));
             mCalibrationReminder = NumberPickerPreference.value;
 
             IntentFilter intentFilter = new IntentFilter();

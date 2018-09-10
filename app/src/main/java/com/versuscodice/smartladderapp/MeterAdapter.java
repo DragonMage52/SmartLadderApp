@@ -6,7 +6,9 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Vibrator;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +29,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Spencer Costello on 3/17/2018.
@@ -37,6 +40,10 @@ public class MeterAdapter extends BaseAdapter {
     private List<Meter> meters = new ArrayList<Meter>();
     private MediaPlayer mRingtone;
     private ImageButton mBtnSilence;
+    private Vibrator mVibrate;
+    private TextToSpeech mTextToSpeech;
+
+    long [] mVibratePattern = {0, 500, 500};
 
     TextView txtID;
     //TextView txtTemp;
@@ -290,17 +297,73 @@ public class MeterAdapter extends BaseAdapter {
             if (mRingtone == null) {
                 mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
             }
+            if (mVibrate == null) {
+                mVibrate = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            }
 
             if (playRingtone) {
-                if (!mRingtone.isPlaying()) {
-                    mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
-                    mRingtone.start();
+                switch(finalThat.mAlarmSetting) {
+                    case 1:
+                        mVibrate.vibrate(mVibratePattern, 0);
+                        break;
+
+                    case 2:
+                        if (!mRingtone.isPlaying()) {
+                            mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+                            mRingtone.start();
+                        }
+                        break;
+
+                    case 3:
+                        if (!mRingtone.isPlaying()) {
+                            mRingtone = MediaPlayer.create((MainActivity) mContext, Settings.System.DEFAULT_RINGTONE_URI);
+                            mRingtone.start();
+                        }
+                        mVibrate.vibrate(mVibratePattern, 0);
+                        break;
+
+                    case 4:
+                        if(mTextToSpeech == null) {
+                            mTextToSpeech = new TextToSpeech(mContext.getApplicationContext(), new TextToSpeech.OnInitListener() {
+                                @Override
+                                public void onInit(int status) {
+                                    mTextToSpeech.setLanguage(Locale.US);
+                                    String voiceMessage = "Alarm on ";
+                                    for (Meter testMeter : meters) {
+                                        if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                            voiceMessage += testMeter.id + ", ";
+                                        }
+                                    }
+                                    mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null);
+                                }
+                            });
+                        }
+                        else {
+                            if(!mTextToSpeech.isSpeaking()) {
+                                String voiceMessage = "Alarm on ";
+                                for (Meter testMeter : meters) {
+                                    if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                        voiceMessage += testMeter.id + ", ";
+                                    }
+                                }
+                                mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null);
+                            }
+                        }
+                        break;
                 }
                 mBtnSilence.setVisibility(View.VISIBLE);
             } else {
                 if (mRingtone.isPlaying()) {
                     mRingtone.stop();
                 }
+                if(mTextToSpeech != null) {
+                    if (mTextToSpeech.isSpeaking()) {
+                        mTextToSpeech.stop();
+                        mTextToSpeech.shutdown();
+                        mTextToSpeech = null;
+                    }
+                }
+                mVibrate.cancel();
                 mBtnSilence.setVisibility(View.INVISIBLE);
             }
 

@@ -15,4 +15,14 @@
             android:title="Calibration Reminder (in days)" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="Alarm Options">
+
+        <ListPreference
+            android:key="perf_appAlarm"
+            android:title="Audio Alarm"
+            android:entries="@array/SoundOptions"
+            android:entryValues="@array/SoundOptionsValues"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

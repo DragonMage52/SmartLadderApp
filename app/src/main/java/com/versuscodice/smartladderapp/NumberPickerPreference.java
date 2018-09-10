@@ -12,12 +12,12 @@ import android.widget.NumberPicker;
 public class NumberPickerPreference extends DialogPreference {
 
     private NumberPicker numberPicker;
-    public static int value = 1;
+    public static int value;
 
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        value = sharedPreferences.getInt("perf_appCalibration", 1);
+        value = sharedPreferences.getInt("perf_appCalibration", 30);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class NumberPickerPreference extends DialogPreference {
 
     public NumberPicker generateNumberPicker() {
         numberPicker = new NumberPicker(getContext());
-        numberPicker.setMinValue(1);
+        numberPicker.setMinValue(0);
         numberPicker.setMaxValue(365);
         numberPicker.setValue(value);
 
