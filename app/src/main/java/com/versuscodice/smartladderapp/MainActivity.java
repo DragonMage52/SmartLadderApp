@@ -98,6 +98,8 @@ public class MainActivity extends AppCompatActivity  {
     String mSSID;
     boolean connectedToWifi = false;
 
+    int mCalibrationReminder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity  {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
+        mCalibrationReminder = NumberPickerPreference.value;
 
         mModel = ViewModelProviders.of(this).get(GridViewModel.class);
         meters = mModel.getMeterList();
@@ -296,6 +299,7 @@ public class MainActivity extends AppCompatActivity  {
             txtAlarms.setText("ALARM-NETWORK-ERROR");
             txtAlarms.setVisibility(View.VISIBLE);
         }
+
     }
 
     @Override
@@ -353,6 +357,11 @@ public class MainActivity extends AppCompatActivity  {
                 udpConnect = new ClientListen();
                 udpConnect.start();
             }
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            mSSID = sharedPref.getString("perf_appWifiSSID", "");
+            mCalibrationReminder = NumberPickerPreference.value;
+
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction("android.net.wifi.STATE_CHANGE");
             registerReceiver(wifiReceiver, intentFilter);
@@ -464,6 +473,7 @@ public class MainActivity extends AppCompatActivity  {
                         //File logDir = getApplicationContext().getDir("logs", Context.MODE_PRIVATE);
                         File logDir = Environment.getExternalStorageDirectory();
                         final File logFile = new File(logDir, fileName);
+                        Log.d("TEST", "logFile path: " + logFile.getAbsolutePath());
 
                         if(!isStoragePermissionGranted()) {
                             while(mExternalStoragePermmisions == 0);
@@ -486,6 +496,7 @@ public class MainActivity extends AppCompatActivity  {
                                 View logView = layoutInflater.inflate(R.layout.popup_log, null);
 
                                 TextView txtLog = logView.findViewById(R.id.txtLog);
+                                String test = arrayMap.get("log");
                                 txtLog.append(arrayMap.get("log"));
                                 DisplayMetrics displayMetrics = new DisplayMetrics();
                                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);

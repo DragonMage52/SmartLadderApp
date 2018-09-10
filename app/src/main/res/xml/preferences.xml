@@ -3,9 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
     <PreferenceCategory android:title="WiFi Settings">
 
-        <EditTextPreference
-            android:key="perf_appWifiSSID"
-            android:title="WiFi SSID" />
+    <EditTextPreference
+        android:key="perf_appWifiSSID"
+        android:title="WiFi SSID" />
+
+</PreferenceCategory>
+    <PreferenceCategory android:title="Meter Calibration">
+
+        <com.versuscodice.smartladderapp.NumberPickerPreference
+            android:key="perf_appCalibration"
+            android:title="Calibration Reminder (in days)" />
 
     </PreferenceCategory>
 </PreferenceScreen>

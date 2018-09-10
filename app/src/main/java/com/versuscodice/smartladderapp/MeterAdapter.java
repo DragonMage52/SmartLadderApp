@@ -25,6 +25,7 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -209,13 +210,15 @@ public class MeterAdapter extends BaseAdapter {
                 txtVersion.setText(thisMeter.version);
             }
 
+
+
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
             }
             else if(thisMeter.mAlarmState) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
             }
-            else if(thisMeter.mWarningState) {
+            else if(thisMeter.mWarningState || !thisMeter.isCalibrated()) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorWarning));
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState) {
@@ -246,6 +249,9 @@ public class MeterAdapter extends BaseAdapter {
             }
             else if(thisMeter.mAlarmMeterBattery) {
                 txtStatus.setText("ALARM-METER BATTERY");
+            }
+            else if(!thisMeter.isCalibrated()) {
+                txtStatus.setText("CALIBRATION NEEDED");
             }
             else if(thisMeter.mEarlyState) {
                 txtStatus.setText("SAMPLING");

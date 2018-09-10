@@ -58,6 +58,8 @@ public class Meter {
 
     Date lastUpdate;
 
+    Date mLastCalibration;
+
     CountDownTimer mActiveTimer;
 
     Handler mActiveHandler = new Handler();
@@ -116,7 +118,16 @@ public class Meter {
         mInsertionCount = Integer.parseInt(arrayMap.get("insertion"));
         version = arrayMap.get("version");
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+        String dateString = arrayMap.get("lastcalibration");
+
+        if(dateString != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            try {
+                mLastCalibration = dateFormat.parse(dateString);
+            } catch (ParseException e) {
+                Log.d("TEST", "Failed to convert last calibration date");
+            }
+        }
         lastUpdate = Calendar.getInstance().getTime();
 
         mActive = true;
@@ -145,5 +156,18 @@ public class Meter {
             });
         }
     };
+
+    public boolean isCalibrated() {
+        if(mLastCalibration != null) {
+            if ((new Date().getTime() - mLastCalibration.getTime()) > (mThat.mCalibrationReminder * 86400000)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        else {
+            return true;
+        }
+    }
 
 }
