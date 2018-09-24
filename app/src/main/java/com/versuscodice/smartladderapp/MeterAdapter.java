@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +43,7 @@ public class MeterAdapter extends BaseAdapter {
     private ImageButton mBtnSilence;
     private Vibrator mVibrate;
     private TextToSpeech mTextToSpeech;
+    private UtteranceProgressListener mUtteranceProgressListener;
 
     long [] mVibratePattern = {0, 500, 500};
 
@@ -334,7 +336,34 @@ public class MeterAdapter extends BaseAdapter {
                                             voiceMessage += testMeter.id + ", ";
                                         }
                                     }
-                                    mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null);
+
+                                    mUtteranceProgressListener = new UtteranceProgressListener() {
+                                        @Override
+                                        public void onStart(String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onDone(String s) {
+                                            String voiceMessage = "Alarm on ";
+                                            for (Meter testMeter : meters) {
+                                                if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                                    voiceMessage += testMeter.id + ", ";
+                                                }
+                                            }
+
+                                            mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null, "alarmSpeech");
+                                        }
+
+                                        @Override
+                                        public void onError(String s) {
+
+                                        }
+                                    };
+
+                                    mTextToSpeech.setOnUtteranceProgressListener(mUtteranceProgressListener);
+
+                                    mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null, "alarmSpeech");
                                 }
                             });
                         }
