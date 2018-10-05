@@ -65,6 +65,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -101,6 +103,10 @@ public class MainActivity extends AppCompatActivity  {
     int mCalibrationReminder;
 
     int mAlarmSetting;
+
+    public ServerSocket mServerSocket = null;
+    public SocketListenThread mServerSocketThread = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,8 +259,12 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         mMulticastSendHandler.post(multicastSendRunnable);
-        udpConnect = new ClientListen();
-        udpConnect.start();
+        /*udpConnect = new ClientListen();
+        udpConnect.start();*/
+
+        mServerSocketThread = new SocketListenThread();
+        mServerSocketThread.start();;
+
     }
 
     public Runnable multicastSendRunnable = new Runnable() {
@@ -316,6 +326,7 @@ public class MainActivity extends AppCompatActivity  {
     protected void onDestroy() {
         //mNsdManager.unregisterService(mRegistrationListener);
         udpConnect.close();
+        mServerSocketThread.close();
         super.onDestroy();
     }
 
@@ -324,6 +335,7 @@ public class MainActivity extends AppCompatActivity  {
         try {
             //mNsdManager.unregisterService(mRegistrationListener);
             udpConnect.close();
+            mServerSocketThread.close();
             mBackground = false;
         } catch (Exception e) {
             Log.d("TEST", "Failed on Pause");
@@ -355,11 +367,12 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onResume() {
         super.onResume();
-        if (udpConnect != null) {
-            if (!udpConnect.isAlive()) {
-                udpConnect = new ClientListen();
-                udpConnect.start();
+        if (mServerSocketThread != null) {
+            if (!mServerSocketThread.isAlive()) {
+                mServerSocketThread = new SocketListenThread();
+                mServerSocketThread.start();
             }
+        }
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             mSSID = sharedPref.getString("perf_appWifiSSID", "");
@@ -369,9 +382,8 @@ public class MainActivity extends AppCompatActivity  {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction("android.net.wifi.STATE_CHANGE");
             registerReceiver(wifiReceiver, intentFilter);
-
             checkWifiState();
-        }
+
         mBackground = true;
         mMulticastSendHandler.post(multicastSendRunnable);
     }
@@ -439,6 +451,61 @@ public class MainActivity extends AppCompatActivity  {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public class SocketListenThread extends Thread {
+        private boolean run = true;
+
+        @Override
+        public void run() {
+            try {
+                mServerSocket = new ServerSocket();
+                mListenPort = mServerSocket.getLocalPort();
+            }
+            catch (IOException e) {
+                Log.e("SocketListenThread", "Failed to open socket");
+            }
+
+            while(run) {
+
+                Socket socket = null;
+                try {
+                    socket = mServerSocket.accept();
+                } catch (IOException e1) {
+                    Log.e("SocketListenThread", "Failed to accept client");
+                }
+
+                boolean found = false;
+                for (Meter testMeter : meters) {
+                    if (testMeter.mAddress.equals(socket.getRemoteSocketAddress().toString())) {
+                        testMeter.openConnection(socket);
+                        found = true;
+                    }
+
+                }
+
+                if (!found) {
+                    for (Meter testMeter : backgroundMeters) {
+                        if (testMeter.mAddress.equals(socket.getRemoteSocketAddress().toString())) {
+                            testMeter.openConnection(socket);
+                            found = true;
+                        }
+
+                    }
+                }
+
+                if (!found) {
+                    Meter newMeter = new Meter();
+                    newMeter.openConnection(socket);
+                    newMeter.mAddress = socket.getRemoteSocketAddress().toString();
+                    backgroundMeters.add(newMeter);
+                }
+            }
+        }
+
+        public void close() {
+            run = false;
         }
     }
 

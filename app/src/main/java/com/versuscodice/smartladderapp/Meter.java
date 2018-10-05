@@ -10,7 +10,10 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,6 +35,7 @@ public class Meter {
     String combExLevel;
     String version;
     InetAddress mIpAddress;
+    String mAddress;
     int mPort = 0;
 
     boolean mAlarmState = false;
@@ -70,6 +74,10 @@ public class Meter {
 
     static MainActivity mThat;
     static MeterAdapter mMeterAdapter;
+
+    Socket mSocket = null;
+
+    ClientManageThread mManageThread;
 
     public Meter() {
 
@@ -175,6 +183,33 @@ public class Meter {
         }
         else {
             return true;
+        }
+    }
+
+    public void openConnection(Socket socket) {
+        mSocket = socket;
+
+        mManageThread = new ClientManageThread();
+        mManageThread.start();
+    }
+
+    public class ClientManageThread extends Thread {
+
+        DataInputStream dataIn;
+
+        @Override
+        public void run() {
+
+            byte buffer [] = new byte[5000];
+
+            while(mSocket.isConnected()) {
+                try {
+                    dataIn = new DataInputStream(mSocket.getInputStream());
+                    dataIn.read(buffer);
+                } catch (IOException e) {
+                    Log.e("ClientManageThread", "Failed to open input stream");
+                }
+            }
         }
     }
 
