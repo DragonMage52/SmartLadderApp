@@ -140,20 +140,28 @@ public class Meter {
         }
 
         mActiveHandler.removeCallbacks(activeRunnable);
-        mActiveHandler.postDelayed(activeRunnable, 15000);
+        mActiveHandler.postDelayed(activeRunnable, 30000);
 
     }
 
     public Runnable activeRunnable = new Runnable() {
         @Override
         public void run() {
-            mActive = false;
-            mThat.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mMeterAdapter.notifyDataSetChanged();
-                }
-            });
+
+            Date now = Calendar.getInstance().getTime();
+
+            if(now.getTime() - lastUpdate.getTime() > 30000) {
+                mActive = false;
+                mThat.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMeterAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+            else {
+                mActiveHandler.postDelayed(activeRunnable, 30000);
+            }
         }
     };
 
