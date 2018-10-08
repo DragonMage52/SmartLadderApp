@@ -460,7 +460,7 @@ public class MainActivity extends AppCompatActivity  {
         @Override
         public void run() {
             try {
-                mServerSocket = new ServerSocket();
+                mServerSocket = new ServerSocket(8975);
                 mListenPort = mServerSocket.getLocalPort();
             }
             catch (IOException e) {
@@ -477,29 +477,42 @@ public class MainActivity extends AppCompatActivity  {
                 }
 
                 boolean found = false;
+                String ip = socket.getRemoteSocketAddress().toString();
+                Log.d("Test", "Found ip: " + ip);
                 for (Meter testMeter : meters) {
-                    if (testMeter.mAddress.equals(socket.getRemoteSocketAddress().toString())) {
-                        testMeter.openConnection(socket);
-                        found = true;
+                    if(testMeter.mIdentifier != null) {
+                        if (testMeter.mIdentifier.equals(ip)) {
+                            testMeter.openConnection(socket);
+                            found = true;
+                        }
                     }
 
                 }
 
                 if (!found) {
                     for (Meter testMeter : backgroundMeters) {
-                        if (testMeter.mAddress.equals(socket.getRemoteSocketAddress().toString())) {
-                            testMeter.openConnection(socket);
-                            found = true;
+                        if(testMeter.mIdentifier != null) {
+                            if (testMeter.mIdentifier.equals(ip)) {
+                                testMeter.openConnection(socket);
+                                found = true;
+                            }
                         }
-
                     }
                 }
 
                 if (!found) {
-                    Meter newMeter = new Meter();
-                    newMeter.openConnection(socket);
-                    newMeter.mAddress = socket.getRemoteSocketAddress().toString();
-                    backgroundMeters.add(newMeter);
+                    final Socket finalSocket = socket;
+                    final String finalIP = ip;
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Meter newMeter = new Meter();
+                            newMeter.openConnection(finalSocket);
+                            newMeter.mIdentifier = finalIP;
+                            backgroundMeters.add(newMeter);
+                        }
+                    });
                 }
             }
         }

@@ -9,6 +9,9 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.MalformedJsonException;
+
+import com.google.gson.Gson;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -35,7 +38,7 @@ public class Meter {
     String combExLevel;
     String version;
     InetAddress mIpAddress;
-    String mAddress;
+    String mIdentifier;
     int mPort = 0;
 
     boolean mAlarmState = false;
@@ -150,6 +153,12 @@ public class Meter {
         mActiveHandler.removeCallbacks(activeRunnable);
         mActiveHandler.postDelayed(activeRunnable, 30000);
 
+        mThat.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mMeterAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     public Runnable activeRunnable = new Runnable() {
@@ -201,14 +210,41 @@ public class Meter {
         public void run() {
 
             byte buffer [] = new byte[5000];
+            int test = 0;
+
+            try {
+                dataIn = new DataInputStream(mSocket.getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             while(mSocket.isConnected()) {
                 try {
-                    dataIn = new DataInputStream(mSocket.getInputStream());
-                    dataIn.read(buffer);
+                    if((test = dataIn.read(buffer)) > 0) {
+                        String text = new String(buffer, 0, test);
+                        Log.d("Received data", text);
+
+                        try {
+                            Gson gson = new Gson();
+                            final ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
+                            update(arrayMap);
+                        } catch(Exception e) {
+                            Log.d("Test", "Failed convert");
+                        }
+
+                    }
+                    else {
+                        Log.d("TEST", "break out of recieve loop");
+                        break;
+                    }
                 } catch (IOException e) {
                     Log.e("ClientManageThread", "Failed to open input stream");
                 }
+            }
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
