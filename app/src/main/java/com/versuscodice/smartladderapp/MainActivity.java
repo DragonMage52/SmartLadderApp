@@ -81,9 +81,9 @@ public class MainActivity extends AppCompatActivity  {
     private String SERVICE_TYPE = "_http._udp";
     private NsdManager mNsdManager;
     private ClientListen udpConnect;
-    private List<Meter> meters;
+    public List<Meter> meters;
 
-    private List<Meter> backgroundMeters = new ArrayList<>();
+    public List<Meter> backgroundMeters = new ArrayList<>();
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
     public GridView gridview;
@@ -325,16 +325,17 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onDestroy() {
         //mNsdManager.unregisterService(mRegistrationListener);
-        udpConnect.close();
-        mServerSocketThread.close();
+        try {
+            mServerSocketThread.close();
+        } catch (Exception e) {
+            Log.d("onDestroy", "Failed to close ServerSocket");
+        }
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
         try {
-            //mNsdManager.unregisterService(mRegistrationListener);
-            udpConnect.close();
             mServerSocketThread.close();
             mBackground = false;
         } catch (Exception e) {
@@ -472,53 +473,30 @@ public class MainActivity extends AppCompatActivity  {
                 Socket socket = null;
                 try {
                     socket = mServerSocket.accept();
-                } catch (IOException e1) {
-                    Log.e("SocketListenThread", "Failed to accept client");
-                }
-
-                boolean found = false;
-                String ip = socket.getRemoteSocketAddress().toString();
-                Log.d("Test", "Found ip: " + ip);
-                for (Meter testMeter : meters) {
-                    if(testMeter.mIdentifier != null) {
-                        if (testMeter.mIdentifier.equals(ip)) {
-                            testMeter.openConnection(socket);
-                            found = true;
-                        }
-                    }
-
-                }
-
-                if (!found) {
-                    for (Meter testMeter : backgroundMeters) {
-                        if(testMeter.mIdentifier != null) {
-                            if (testMeter.mIdentifier.equals(ip)) {
-                                testMeter.openConnection(socket);
-                                found = true;
-                            }
-                        }
-                    }
-                }
-
-                if (!found) {
+                    String ip = socket.getRemoteSocketAddress().toString();
+                    Log.d("Test", "Found ip: " + ip);
                     final Socket finalSocket = socket;
-                    final String finalIP = ip;
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Meter newMeter = new Meter();
                             newMeter.openConnection(finalSocket);
-                            newMeter.mIdentifier = finalIP;
-                            backgroundMeters.add(newMeter);
                         }
                     });
+                } catch (IOException e1) {
+                    Log.e("SocketListenThread", "Failed to accept client");
                 }
             }
         }
 
         public void close() {
             run = false;
+            try {
+                mServerSocket.close();
+            } catch (IOException e) {
+                Log.d("close ServerSocketThread", "Failed to close server socket");
+            }
         }
     }
 

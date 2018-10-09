@@ -38,7 +38,6 @@ public class Meter {
     String combExLevel;
     String version;
     InetAddress mIpAddress;
-    String mIdentifier;
     int mPort = 0;
 
     boolean mAlarmState = false;
@@ -81,6 +80,8 @@ public class Meter {
     Socket mSocket = null;
 
     ClientManageThread mManageThread;
+
+    boolean mInitalized = false;
 
     public Meter() {
 
@@ -151,7 +152,44 @@ public class Meter {
         }
 
         mActiveHandler.removeCallbacks(activeRunnable);
-        mActiveHandler.postDelayed(activeRunnable, 30000);
+        mActiveHandler.postDelayed(activeRunnable, 10000);
+
+        if(!mInitalized) {
+            mInitalized = true;
+
+            boolean found = false;
+            for(int i = 0; i < mThat.meters.size(); i++) {
+                if(mThat.meters.get(i).id != null) {
+                    if(mThat.meters.get(i).id.equals(id)) {
+                        mThat.meters.set(i, this);
+                        found = true;
+                    }
+                }
+            }
+
+            if(!found) {
+                for(int i = 0; i < mThat.backgroundMeters.size(); i++) {
+                    if(mThat.backgroundMeters.get(i).id != null) {
+                        if(mThat.backgroundMeters.get(i).id.equals(id)) {
+                            mThat.backgroundMeters.set(i, this);
+                            found = true;
+                        }
+                    }
+                }
+            }
+
+            if (!found) {
+
+                final Meter finalThisMeter = this;
+
+                mThat.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mThat.backgroundMeters.add(finalThisMeter);
+                    }
+                });
+            }
+        }
 
         mThat.runOnUiThread(new Runnable() {
             @Override
@@ -167,7 +205,7 @@ public class Meter {
 
             Date now = Calendar.getInstance().getTime();
 
-            if(now.getTime() - lastUpdate.getTime() > 30000) {
+            if(now.getTime() - lastUpdate.getTime() > 10000) {
                 mActive = false;
                 mThat.runOnUiThread(new Runnable() {
                     @Override
@@ -177,7 +215,7 @@ public class Meter {
                 });
             }
             else {
-                mActiveHandler.postDelayed(activeRunnable, 30000);
+                mActiveHandler.postDelayed(activeRunnable, 10000);
             }
         }
     };
@@ -200,17 +238,19 @@ public class Meter {
 
         mManageThread = new ClientManageThread();
         mManageThread.start();
+
     }
 
     public class ClientManageThread extends Thread {
 
         DataInputStream dataIn;
+        boolean run = false;
 
         @Override
         public void run() {
 
             byte buffer [] = new byte[5000];
-            int test = 0;
+            int test;
 
             try {
                 dataIn = new DataInputStream(mSocket.getInputStream());
@@ -218,7 +258,9 @@ public class Meter {
                 e.printStackTrace();
             }
 
-            while(mSocket.isConnected()) {
+
+            run = true;
+            while(mThat.mBackground) {
                 try {
                     if((test = dataIn.read(buffer)) > 0) {
                         String text = new String(buffer, 0, test);
@@ -243,8 +285,18 @@ public class Meter {
             }
             try {
                 mSocket.close();
+
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("ClientMangeThread", "Failed to close socket");
+            }
+        }
+
+        public void close() {
+            run = false;
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                Log.e("close ClientMangeThread", "Failed to close socket");
             }
         }
     }
