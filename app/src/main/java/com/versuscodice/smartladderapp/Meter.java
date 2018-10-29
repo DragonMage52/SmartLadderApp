@@ -152,9 +152,6 @@ public class Meter {
             mAlarmSilenceState = 0;
         }
 
-        mActiveHandler.removeCallbacks(activeRunnable);
-        mActiveHandler.postDelayed(activeRunnable, 10000);
-
         if(!mInitalized) {
             mInitalized = true;
 
@@ -271,6 +268,9 @@ public class Meter {
                     if((test = dataIn.read(buffer)) > 0) {
                         String text = new String(buffer, 0, test);
                         Log.d("Received data", text);
+
+                        mActiveHandler.removeCallbacks(activeRunnable);
+                        mActiveHandler.postDelayed(activeRunnable, 10000);
 
                         try {
                             Gson gson = new Gson();
