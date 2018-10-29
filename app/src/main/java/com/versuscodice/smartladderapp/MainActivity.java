@@ -176,6 +176,7 @@ public class MainActivity extends AppCompatActivity  {
                 if (meters.get(i).mActive) {
                     popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
                     popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
+                    popup.getMenu().add(Menu.NONE, 3, Menu.NONE, "Clear Log");
                 }
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -204,20 +205,30 @@ public class MainActivity extends AppCompatActivity  {
                                 meterAdapter.notifyDataSetChanged();
                                 return true;
 
+                            case 3:
+                                meters.get(i).sendData("Clear");
+                                break;
+
                             case 2:
-                                packet = new DatagramPacket("Insertion".getBytes(), "Insertion".length());
+                                /*packet = new DatagramPacket("Insertion".getBytes(), "Insertion".length());
                                 packet.setAddress(meters.get(i).mIpAddress);
                                 packet.setPort(meters.get(i).mPort);
                                 sendThread = new SendThread(packet);
-                                sendThread.start();
+                                sendThread.start();*/
+
+                                meters.get(i).sendData("Insertion");
+
                                 break;
 
                             case 1:
-                                packet = new DatagramPacket("Log".getBytes(), "Log".length());
+                                /*packet = new DatagramPacket("Log".getBytes(), "Log".length());
                                 packet.setAddress(meters.get(i).mIpAddress);
                                 packet.setPort(meters.get(i).mPort);
                                 sendThread = new SendThread(packet);
-                                sendThread.start();
+                                sendThread.start();*/
+
+                                meters.get(i).sendData("Log");
+
                                 break;
 
                             case 0:
@@ -322,6 +333,99 @@ public class MainActivity extends AppCompatActivity  {
         return true;
     }
 
+    public void displayLog(ArrayMap<String, String> arrayMap) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        String date = dateFormat.format(Calendar.getInstance().getTime());
+
+
+        //final String fileName = date +  arrayMap.get("id") + " events.log";
+        final String fileName = "events.log";
+
+        //File logDir = getApplicationContext().getDir("logs", Context.MODE_PRIVATE);
+        File logDir = Environment.getExternalStorageDirectory();
+        final File logFile = new File(logDir, fileName);
+        Log.d("TEST", "logFile path: " + logFile.getAbsolutePath());
+
+        if(!isStoragePermissionGranted()) {
+            while(mExternalStoragePermmisions == 0);
+        }
+
+        if(mExternalStoragePermmisions == 1) {
+            try {
+                FileOutputStream outputStream = new FileOutputStream(logFile);
+                outputStream.write(arrayMap.get("log").getBytes());
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        final ArrayMap<String, String> finalArrayMap = arrayMap;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View logView = layoutInflater.inflate(R.layout.popup_log, null);
+
+                TextView txtLog = logView.findViewById(R.id.txtLog);
+                String test = finalArrayMap.get("log");
+                txtLog.append(finalArrayMap.get("log"));
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+
+                final PopupWindow popupWindow = new PopupWindow(logView, displayMetrics.widthPixels - 60, displayMetrics.heightPixels - 60, true);
+                popupWindow.showAtLocation(gridview, Gravity.CENTER, 0, 0);
+
+                Button btnClose = logView.findViewById(R.id.btnClosePopup);
+                btnClose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        popupWindow.dismiss();
+                    }
+                });
+
+                Button btnEmail = logView.findViewById(R.id.btnEmail);
+                btnEmail.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mExternalStoragePermmisions == 1) {
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("*/*");
+                            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "com.versuscodice.provider", logFile));
+                            if (intent.resolveActivity(getPackageManager()) != null) {
+                                startActivity(intent);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.d("TEST","Permission is granted");
+                mExternalStoragePermmisions = 1;
+                return true;
+            } else {
+
+                Log.d("TEST","Permission is revoked");
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                mExternalStoragePermmisions = 0;
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.d("TEST","Permission is granted");
+            mExternalStoragePermmisions = 1;
+            return true;
+        }
+    }
+
     @Override
     protected void onDestroy() {
         //mNsdManager.unregisterService(mRegistrationListener);
@@ -335,6 +439,7 @@ public class MainActivity extends AppCompatActivity  {
 
     @Override
     protected void onPause() {
+
         try {
             mServerSocketThread.close();
             mBackground = false;
@@ -352,6 +457,16 @@ public class MainActivity extends AppCompatActivity  {
                 metersID[count] = testMeter.id;
             }
             count++;
+
+            if(testMeter.mSocket != null) {
+                testMeter.mManageThread.close();
+            }
+        }
+
+        for (Meter testMeter : backgroundMeters) {
+            if (testMeter.mSocket != null) {
+                testMeter.mManageThread.close();
+            }
         }
 
         SharedPreferences.Editor prefsEditor = mPrefs.edit();

@@ -14,6 +14,7 @@ import android.util.MalformedJsonException;
 import com.google.gson.Gson;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -241,6 +242,11 @@ public class Meter {
 
     }
 
+    public void sendData(String message) {
+        SendThread sendThread = new SendThread(message.getBytes());
+        sendThread.start();
+    }
+
     public class ClientManageThread extends Thread {
 
         DataInputStream dataIn;
@@ -249,7 +255,7 @@ public class Meter {
         @Override
         public void run() {
 
-            byte buffer [] = new byte[5000];
+            byte buffer [] = new byte[100000];
             int test;
 
             try {
@@ -260,7 +266,7 @@ public class Meter {
 
 
             run = true;
-            while(mThat.mBackground) {
+            while(run) {
                 try {
                     if((test = dataIn.read(buffer)) > 0) {
                         String text = new String(buffer, 0, test);
@@ -268,8 +274,13 @@ public class Meter {
 
                         try {
                             Gson gson = new Gson();
-                            final ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
-                            update(arrayMap);
+                            ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
+                            if(arrayMap.get("command").equals("update")) {
+                                update(arrayMap);
+                            }
+                            else if(arrayMap.get("command").equals("log")) {
+                                mThat.displayLog(arrayMap);
+                            }
                         } catch(Exception e) {
                             Log.d("Test", "Failed convert");
                         }
@@ -297,6 +308,46 @@ public class Meter {
                 mSocket.close();
             } catch (IOException e) {
                 Log.e("close ClientMangeThread", "Failed to close socket");
+            }
+        }
+    }
+
+    public class SendThread extends Thread {
+
+        DataOutputStream dataOut;
+        byte [] mMessage;
+
+        public SendThread(byte [] message) {
+            mMessage = message;
+        }
+
+        @Override
+        public void run() {
+            if (mSocket != null) {
+                if (mSocket.isConnected()) {
+
+                    try {
+                        dataOut = new DataOutputStream(mSocket.getOutputStream());
+                    } catch (IOException e) {
+                        Log.e("ServerMangeThread", "Failed to open socket");
+                    }
+
+                    try {
+                        dataOut.write(mMessage);
+                        Log.d("SendThread", "sent");
+                    } catch (IOException e) {
+                        Log.e("SendThread", "Failed to open output stream");
+                    }
+
+                }
+            }
+        }
+
+        public void close() {
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                Log.d("close SendThread", "Failed to close socket");
             }
         }
     }
