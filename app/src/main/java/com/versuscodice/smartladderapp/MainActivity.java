@@ -459,13 +459,15 @@ public class MainActivity extends AppCompatActivity  {
             count++;
 
             if(testMeter.mSocket != null) {
-                testMeter.mManageThread.close();
+                //testMeter.mManageThread.close();
+                testMeter.sendData("close");
             }
         }
 
         for (Meter testMeter : backgroundMeters) {
             if (testMeter.mSocket != null) {
-                testMeter.mManageThread.close();
+                //testMeter.mManageThread.close();
+                testMeter.sendData("close");
             }
         }
 

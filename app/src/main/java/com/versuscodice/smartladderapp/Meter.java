@@ -240,7 +240,7 @@ public class Meter {
     }
 
     public void sendData(String message) {
-        SendThread sendThread = new SendThread(message.getBytes());
+        SendThread sendThread = new SendThread(message);
         sendThread.start();
     }
 
@@ -316,9 +316,11 @@ public class Meter {
 
         DataOutputStream dataOut;
         byte [] mMessage;
+        String mStrMessage;
 
-        public SendThread(byte [] message) {
-            mMessage = message;
+        public SendThread(String message) {
+            mMessage = message.getBytes();
+            mStrMessage = message;
         }
 
         @Override
@@ -339,6 +341,9 @@ public class Meter {
                         Log.e("SendThread", "Failed to open output stream");
                     }
 
+                    if(mStrMessage.equals("close")) {
+                        close();
+                    }
                 }
             }
         }
