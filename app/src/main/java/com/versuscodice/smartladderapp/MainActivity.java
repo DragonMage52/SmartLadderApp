@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity  {
     public ServerSocket mServerSocket = null;
     public SocketListenThread mServerSocketThread = null;
 
+    int mPendingClearMeter = -1;
+    int mPendingInsertionMeter = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,6 +187,7 @@ public class MainActivity extends AppCompatActivity  {
 
                         DatagramPacket packet;
                         SendThread sendThread;
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
                         switch (menuItem.getItemId()) {
                             case R.id.itemChooseMeter:
@@ -206,27 +209,17 @@ public class MainActivity extends AppCompatActivity  {
                                 return true;
 
                             case 3:
-                                meters.get(i).sendData("Clear");
+                                builder.setMessage("Are you sure you want to clear the log for " + meters.get(i).id +"?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+                                mPendingClearMeter = i;
                                 break;
 
                             case 2:
-                                /*packet = new DatagramPacket("Insertion".getBytes(), "Insertion".length());
-                                packet.setAddress(meters.get(i).mIpAddress);
-                                packet.setPort(meters.get(i).mPort);
-                                sendThread = new SendThread(packet);
-                                sendThread.start();*/
-
-                                meters.get(i).sendData("Insertion");
+                                builder.setMessage("Are you sure you want to reset the insertion count for " + meters.get(i).id +"?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+                                mPendingInsertionMeter = i;
 
                                 break;
 
                             case 1:
-                                /*packet = new DatagramPacket("Log".getBytes(), "Log".length());
-                                packet.setAddress(meters.get(i).mIpAddress);
-                                packet.setPort(meters.get(i).mPort);
-                                sendThread = new SendThread(packet);
-                                sendThread.start();*/
-
                                 meters.get(i).sendData("Log");
 
                                 break;
@@ -274,9 +267,32 @@ public class MainActivity extends AppCompatActivity  {
         udpConnect.start();*/
 
         mServerSocketThread = new SocketListenThread();
-        mServerSocketThread.start();;
+        mServerSocketThread.start();
 
     }
+
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    if(mPendingClearMeter != -1) {
+                        meters.get(mPendingClearMeter).sendData("Clear");
+                        mPendingClearMeter = -1;
+                    }
+                    else if(mPendingInsertionMeter != -1) {
+                        meters.get(mPendingInsertionMeter).sendData("Insertion");
+                        mPendingInsertionMeter = -1;
+                    }
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    mPendingClearMeter = -1;
+                    mPendingInsertionMeter = -1;
+                    break;
+            }
+        }
+    };
 
     public Runnable multicastSendRunnable = new Runnable() {
         @Override

@@ -292,6 +292,7 @@ public class Meter {
                     }
                 } catch (IOException e) {
                     Log.e("ClientManageThread", "Failed to open input stream");
+                    close();
                 }
             }
             try {
@@ -326,7 +327,7 @@ public class Meter {
         @Override
         public void run() {
             if (mSocket != null) {
-                if (mSocket.isConnected()) {
+                if (!mSocket.isClosed()) {
 
                     try {
                         dataOut = new DataOutputStream(mSocket.getOutputStream());
@@ -337,7 +338,7 @@ public class Meter {
                     try {
                         dataOut.write(mMessage);
                         Log.d("SendThread", "sent");
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         Log.e("SendThread", "Failed to open output stream");
                     }
 

@@ -330,10 +330,10 @@ public class MeterAdapter extends BaseAdapter {
                                 @Override
                                 public void onInit(int status) {
                                     mTextToSpeech.setLanguage(Locale.US);
-                                    String voiceMessage = "Alarm on ";
+                                    String voiceMessage = "";
                                     for (Meter testMeter : meters) {
                                         if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
-                                            voiceMessage += testMeter.id + ", ";
+                                            voiceMessage += "Alarm on " + testMeter.id + ". ";
                                         }
                                     }
 
@@ -345,10 +345,10 @@ public class MeterAdapter extends BaseAdapter {
 
                                         @Override
                                         public void onDone(String s) {
-                                            String voiceMessage = "Alarm on ";
+                                            String voiceMessage = "";
                                             for (Meter testMeter : meters) {
                                                 if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
-                                                    voiceMessage += testMeter.id + ", ";
+                                                    voiceMessage += "Alarm on " + testMeter.id + ". ";
                                                 }
                                             }
 
@@ -369,10 +369,10 @@ public class MeterAdapter extends BaseAdapter {
                         }
                         else {
                             if(!mTextToSpeech.isSpeaking()) {
-                                String voiceMessage = "Alarm on ";
+                                String voiceMessage = "";
                                 for (Meter testMeter : meters) {
                                     if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
-                                        voiceMessage += testMeter.id + ", ";
+                                        voiceMessage += "Alarm on " + testMeter.id + ". ";
                                     }
                                 }
                                 mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null);
