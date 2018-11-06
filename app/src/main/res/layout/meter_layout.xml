@@ -16,8 +16,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
-        android:textColor="@color/colorBackground"
         android:textAlignment="center"
+        android:textColor="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,8 +30,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
-        android:textColor="@color/colorBackground"
         android:textAlignment="center"
+        android:textColor="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtLED" />
@@ -65,6 +65,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtRemoteBatteryLevel" />
@@ -76,6 +77,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCarbonDioxideLevel" />
@@ -155,6 +157,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCombExLevel" />
@@ -166,6 +169,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtHydrogenSulfideLevel" />
@@ -177,6 +181,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
@@ -188,6 +193,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtOxygenLevel" />
@@ -200,8 +206,8 @@
         android:layout_marginStart="25dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
-        android:textColor="@color/colorBackground"
         android:textAlignment="center"
+        android:textColor="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtID" />
@@ -224,6 +230,7 @@
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtLocalBattery" />
@@ -237,29 +244,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_popup_sync" />
-
-    <TextView
-        android:id="@+id/txtStaticVersion"
-        android:layout_width="19dp"
-        android:layout_height="11dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="6dp"
-        android:text="Ver."
-        android:textColor="@color/colorBackground"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toStartOf="@+id/txtVersion"
-        app:layout_constraintTop_toBottomOf="@+id/txtInsertionCount" />
-
-    <TextView
-        android:id="@+id/txtVersion"
-        android:layout_width="19dp"
-        android:layout_height="11dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginTop="6dp"
-        android:text="1.0"
-        android:textColor="@color/colorBackground"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtInsertionCount" />
 
 </android.support.constraint.ConstraintLayout>

@@ -59,7 +59,6 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtCarbonDioxideLevel;
     TextView txtCombExLevel;
     TextView txtInsertionCount;
-    TextView txtVersion;
     ConstraintLayout container;
 
     //TextView txtStaticTemp;
@@ -71,7 +70,6 @@ public class MeterAdapter extends BaseAdapter {
     TextView txtStaticLocalBattery;
     TextView txtStaticLastUpdated;
     TextView txtStaticInsertionCount;
-    TextView txtStaticVersion;
     ImageView imgSync;
 
 
@@ -133,7 +131,6 @@ public class MeterAdapter extends BaseAdapter {
             txtCarbonDioxideLevel = view.findViewById(R.id.txtCarbonDioxideLevel);
             txtCombExLevel = view.findViewById(R.id.txtCombExLevel);
             txtInsertionCount = view.findViewById(R.id.txtInsertionCount);
-            txtVersion = view.findViewById(R.id.txtVersion);
             container = view.findViewById(R.id.meter_container);
 
             //txtStaticTemp = view.findViewById(R.id.txtStaticTemp);
@@ -145,7 +142,6 @@ public class MeterAdapter extends BaseAdapter {
             txtStaticLocalBattery = view.findViewById(R.id.txtStaticLocalBattery);
             txtStaticLastUpdated = view.findViewById(R.id.txtStaticLastUpdate);
             txtStaticInsertionCount = view.findViewById(R.id.txtStaticInsertionCount);
-            txtStaticVersion = view.findViewById(R.id.txtStaticVersion);
 
 
             imgSync = view.findViewById(R.id.imgSync);
@@ -215,8 +211,6 @@ public class MeterAdapter extends BaseAdapter {
                 animationSet.addAnimation(alphaAnimation);
                 animationSet.addAnimation(rotateAnimation);
                 imgSync.startAnimation(animationSet);
-
-                txtVersion.setText(thisMeter.version);
             }
 
 
@@ -423,7 +417,6 @@ public class MeterAdapter extends BaseAdapter {
         txtCarbonDioxideLevel.setVisibility(View.INVISIBLE);
         txtCombExLevel.setVisibility(View.INVISIBLE);
         txtInsertionCount.setVisibility(View.INVISIBLE);
-        txtVersion.setVisibility(View.INVISIBLE);
 
         //txtStaticTemp.setVisibility(View.INVISIBLE);
         txtStaticLEL.setVisibility(View.INVISIBLE);
@@ -434,7 +427,6 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticLocalBattery.setVisibility(View.INVISIBLE);
         txtStaticLastUpdated.setVisibility(View.INVISIBLE);
         txtStaticInsertionCount.setVisibility(View.INVISIBLE);
-        txtStaticVersion.setVisibility(View.INVISIBLE);
         imgSync.setVisibility(View.INVISIBLE);
     }
 
@@ -451,7 +443,6 @@ public class MeterAdapter extends BaseAdapter {
         txtCarbonDioxideLevel.setVisibility(View.VISIBLE);
         txtCombExLevel.setVisibility(View.VISIBLE);
         txtInsertionCount.setVisibility(View.VISIBLE);
-        txtVersion.setVisibility(View.VISIBLE);
 
         //txtStaticTemp.setVisibility(View.VISIBLE);
         txtStaticLEL.setVisibility(View.VISIBLE);
@@ -462,7 +453,6 @@ public class MeterAdapter extends BaseAdapter {
         txtStaticLocalBattery.setVisibility(View.VISIBLE);
         txtStaticLastUpdated.setVisibility(View.VISIBLE);
         txtStaticInsertionCount.setVisibility(View.VISIBLE);
-        txtStaticVersion.setVisibility(View.VISIBLE);
         imgSync.setVisibility(View.VISIBLE);
     }
 }

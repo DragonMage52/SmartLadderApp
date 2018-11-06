@@ -37,6 +37,9 @@ public class PairingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pairing);
 
+        TextView txtSSID = (TextView) findViewById(R.id.edittxtSSID);
+        txtSSID.setText(getIntent().getStringExtra("SSID"));
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         mBluetoothName = mBluetoothAdapter.getName();
@@ -91,7 +94,8 @@ public class PairingActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        super.onPause();  // Always call the superclass method first
+        super.onPause();
+        mBluetoothAdapter.setName(mBluetoothName);
     }
 
     public void setStatusText(String text) {

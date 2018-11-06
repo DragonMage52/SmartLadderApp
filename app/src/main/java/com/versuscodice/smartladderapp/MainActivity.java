@@ -179,6 +179,8 @@ public class MainActivity extends AppCompatActivity  {
                     popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
                     popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
                     popup.getMenu().add(Menu.NONE, 3, Menu.NONE, "Clear Log");
+                    popup.getMenu().add(Menu.NONE, 4, Menu.NONE, "Version " + meters.get(i).version).setEnabled(false);
+
                 }
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -576,6 +578,7 @@ public class MainActivity extends AppCompatActivity  {
         switch (item.getItemId()) {
             case R.id.actParing:
                 Intent pairingIntent = new Intent(this, PairingActivity.class);
+                pairingIntent.putExtra("SSID", mSSID);
                 startActivity(pairingIntent);
                 return true;
 
