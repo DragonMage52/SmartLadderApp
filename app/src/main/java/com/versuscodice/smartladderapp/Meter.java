@@ -279,7 +279,7 @@ public class Meter {
                                 update(arrayMap);
                             }
                             else if(arrayMap.get("command").equals("log")) {
-                                mThat.displayLog(arrayMap);
+                                mThat.displayLog(arrayMap, id);
                             }
                         } catch(Exception e) {
                             Log.d("Test", "Failed convert");

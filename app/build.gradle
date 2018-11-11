@@ -68,3 +68,7 @@ dependencies {
     // optional - Test helpers for LiveData
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
 }
+
+dependencies {
+    implementation 'com.github.hedzr:android-file-chooser:v1.1.11'
+}

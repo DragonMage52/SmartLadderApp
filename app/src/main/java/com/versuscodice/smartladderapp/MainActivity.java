@@ -54,6 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.rafakob.nsdhelper.NsdHelper;
 import com.rafakob.nsdhelper.NsdListener;
 import com.rafakob.nsdhelper.NsdService;
@@ -351,56 +352,107 @@ public class MainActivity extends AppCompatActivity  {
         return true;
     }
 
-    public void displayLog(ArrayMap<String, String> arrayMap) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-        String date = dateFormat.format(Calendar.getInstance().getTime());
-
-
-        //final String fileName = date +  arrayMap.get("id") + " events.log";
-        final String fileName = "events.log";
-
-        //File logDir = getApplicationContext().getDir("logs", Context.MODE_PRIVATE);
-        File logDir = Environment.getExternalStorageDirectory();
-        final File logFile = new File(logDir, fileName);
-        Log.d("TEST", "logFile path: " + logFile.getAbsolutePath());
-
-        if(!isStoragePermissionGranted()) {
-            while(mExternalStoragePermmisions == 0);
-        }
-
-        if(mExternalStoragePermmisions == 1) {
-            try {
-                FileOutputStream outputStream = new FileOutputStream(logFile);
-                outputStream.write(arrayMap.get("log").getBytes());
-                outputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void displayLog(ArrayMap<String, String> arrayMap, final String id) {
 
         final ArrayMap<String, String> finalArrayMap = arrayMap;
+
+        final MainActivity that = this;
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                final String fileName = "events.log";
+
+                File defaultDir = Environment.getExternalStorageDirectory();
+                final File logFile = new File(defaultDir, fileName);
+
+                if(!isStoragePermissionGranted()) {
+                    while(mExternalStoragePermmisions == 0);
+                }
+
+                if(mExternalStoragePermmisions == 1) {
+                    try {
+                        FileOutputStream outputStream = new FileOutputStream(logFile);
+                        outputStream.write(finalArrayMap.get("log").getBytes());
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View logView = layoutInflater.inflate(R.layout.popup_log, null);
 
                 TextView txtLog = logView.findViewById(R.id.txtLog);
-                String test = finalArrayMap.get("log");
                 txtLog.append(finalArrayMap.get("log"));
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
                 windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
 
-                final PopupWindow popupWindow = new PopupWindow(logView, displayMetrics.widthPixels - 60, displayMetrics.heightPixels - 60, true);
+                final PopupWindow popupWindow = new PopupWindow(logView, displayMetrics.widthPixels - 100, displayMetrics.heightPixels - 80, true);
                 popupWindow.showAtLocation(gridview, Gravity.CENTER, 0, 0);
+
+                final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(that);
+                String logDir = sharedPref.getString("logDir", "");
+                if(logDir.equals("")) {
+                    logDir = defaultDir.getPath();
+                }
+
+                final String finalLogDir = logDir;
 
                 Button btnClose = logView.findViewById(R.id.btnClosePopup);
                 btnClose.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         popupWindow.dismiss();
+                    }
+                });
+
+                Button btnSave = logView.findViewById(R.id.btnSavePopup);
+                btnSave.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        new ChooserDialog().with(that)
+                                .enableOptions(true)
+                                .withFilter(true, false)
+                                .withStartFile(finalLogDir)
+                                .withChosenListener(new ChooserDialog.Result() {
+                                    @Override
+                                    public void onChoosePath(String path, File pathFile) {
+                                        Toast.makeText(MainActivity.this, "FOLDER: " + path, Toast.LENGTH_SHORT).show();
+
+                                        SharedPreferences.Editor prefsEditor = sharedPref.edit();
+                                        prefsEditor.putString("logDir", path);
+                                        prefsEditor.commit();
+
+                                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+                                        String date = dateFormat.format(Calendar.getInstance().getTime());
+
+
+                                        final String fileName = date + " " + id + " events.log";
+
+                                        final File finalLogFile = new File(path, fileName);
+                                        Log.d("TEST", "logFile path: " + finalLogFile.getAbsolutePath());
+
+                                        if(!isStoragePermissionGranted()) {
+                                            while(mExternalStoragePermmisions == 0);
+                                        }
+
+                                        if(mExternalStoragePermmisions == 1) {
+                                            try {
+                                                FileOutputStream outputStream = new FileOutputStream(finalLogFile);
+                                                outputStream.write(finalArrayMap.get("log").getBytes());
+                                                outputStream.close();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                })
+                                .build()
+                                .show();
                     }
                 });
 

@@ -95,13 +95,12 @@ public class PairingActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        mBluetoothAdapter.setName(mBluetoothName);
+        //mBluetoothAdapter.setName(mBluetoothName);
     }
 
     public void setStatusText(String text) {
         txtStatus.setText(text);
         if(text.equals("Connected")) {
-            mBluetoothAdapter.setName(mBluetoothName);
             finish();
         }
     }

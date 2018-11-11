@@ -18,6 +18,16 @@
         app:layout_constraintTop_toBottomOf="@+id/scrollLog" />
 
     <Button
+        android:id="@+id/btnSavePopup"
+        android:layout_width="73dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="200dp"
+        android:layout_marginTop="8dp"
+        android:text="Save"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollLog" />
+
+    <Button
         android:id="@+id/btnEmail"
         android:layout_width="73dp"
         android:layout_height="41dp"
