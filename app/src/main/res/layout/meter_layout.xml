@@ -39,7 +39,7 @@
     <TextView
         android:id="@+id/txtStaticLocalBattery"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Ladder Battery:"
@@ -50,7 +50,7 @@
     <TextView
         android:id="@+id/txtStaticMeterBattery"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Meter Battery:"
@@ -60,8 +60,8 @@
 
     <TextView
         android:id="@+id/txtLocalBattery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -72,8 +72,8 @@
 
     <TextView
         android:id="@+id/txtRemoteBatteryLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -83,33 +83,21 @@
         app:layout_constraintTop_toBottomOf="@+id/txtCarbonDioxideLevel" />
 
     <TextView
-        android:id="@+id/txtStaticLastUpdate"
+        android:id="@+id/txtDaysToCal"
         android:layout_width="wrap_content"
         android:layout_height="13dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="6dp"
-        android:text="Last Updated:"
+        android:text="Days to Calibration Due:"
         android:textColor="@color/colorBackground"
-        android:textSize="10dp"
+        android:textSize="10sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticInsertionCount" />
 
     <TextView
-        android:id="@+id/txtLastUpdate"
-        android:layout_width="wrap_content"
-        android:layout_height="13dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="TextView"
-        android:textColor="@color/colorBackground"
-        android:textSize="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticLastUpdate" />
-
-    <TextView
         android:id="@+id/txtStaticO2"
         android:layout_width="wrap_content"
-        android:layout_height="17dp"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="02:"
@@ -120,7 +108,7 @@
     <TextView
         android:id="@+id/txtStaticH2SO4"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="H2S:"
@@ -131,7 +119,7 @@
     <TextView
         android:id="@+id/txtStaticCO"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="CO:"
@@ -142,7 +130,7 @@
     <TextView
         android:id="@+id/txtStaticLEL"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="LEL:"
@@ -152,8 +140,8 @@
 
     <TextView
         android:id="@+id/txtOxygenLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -164,8 +152,8 @@
 
     <TextView
         android:id="@+id/txtCarbonDioxideLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -177,7 +165,7 @@
     <TextView
         android:id="@+id/txtCombExLevel"
         android:layout_width="58dp"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -188,8 +176,8 @@
 
     <TextView
         android:id="@+id/txtHydrogenSulfideLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
@@ -215,7 +203,7 @@
     <TextView
         android:id="@+id/txtStaticInsertionCount"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="Insertion Count:"
@@ -225,8 +213,8 @@
 
     <TextView
         android:id="@+id/txtInsertionCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="58dp"
+        android:layout_height="18dp"
         android:layout_marginStart="120dp"
         android:layout_marginTop="3dp"
         android:text="TextView"

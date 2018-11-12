@@ -8,14 +8,17 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.JsonReader;
 import android.util.Log;
 import android.util.MalformedJsonException;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.text.ParseException;
@@ -84,6 +87,8 @@ public class Meter {
 
     boolean mInitalized = false;
 
+    int mCalDueInternal = 0;
+
     public Meter() {
 
     }
@@ -130,6 +135,7 @@ public class Meter {
         mPort = Integer.parseInt(arrayMap.get("port"));
         mInsertionCount = Integer.parseInt(arrayMap.get("insertion"));
         version = arrayMap.get("version");
+        String caldueinterval = arrayMap.get("caldueinterval");
 
         String dateString = arrayMap.get("lastcalibration");
 
@@ -142,6 +148,10 @@ public class Meter {
             }
         }
         lastUpdate = Calendar.getInstance().getTime();
+
+        if(caldueinterval != null) {
+            mCalDueInternal = Integer.parseInt(caldueinterval);
+        }
 
         mActive = true;
 
@@ -203,31 +213,30 @@ public class Meter {
 
             Date now = Calendar.getInstance().getTime();
 
-            if(now.getTime() - lastUpdate.getTime() > 10000) {
-                mActive = false;
-                mThat.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMeterAdapter.notifyDataSetChanged();
-                    }
-                });
+            if (lastUpdate != null) {
+                if (now.getTime() - lastUpdate.getTime() > 10000) {
+                    mActive = false;
+                    mThat.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mMeterAdapter.notifyDataSetChanged();
+                        }
+                    });
+                } else {
+                    mActiveHandler.postDelayed(activeRunnable, 10000);
+                }
             }
-            else {
-                mActiveHandler.postDelayed(activeRunnable, 10000);
-            }
-        }
-    };
+        }    };
 
-    public boolean isCalibrated() {
-        if(mLastCalibration != null && mThat.mCalibrationReminder != 0) {
-            if ((new Date().getTime() - mLastCalibration.getTime()) > (mThat.mCalibrationReminder * 86400000)) {
-                return false;
-            } else {
-                return true;
-            }
+    public int getDaysToCal() {
+        if(mLastCalibration != null && mCalDueInternal != 0) {
+            Date today = new Date();
+            long daysInMilli = today.getTime() - mLastCalibration.getTime();
+            int days = (int) (daysInMilli / 86400000);
+            return (mCalDueInternal - days < 0) ? (0) : (mCalDueInternal - days);
         }
         else {
-            return true;
+            return 0;
         }
     }
 
@@ -266,7 +275,7 @@ public class Meter {
             while(run) {
                 try {
                     if((test = dataIn.read(buffer)) > 0) {
-                        String text = new String(buffer, 0, test);
+                        String text = new String(buffer, 0, test).trim();
                         Log.d("Received data", text);
 
                         mActiveHandler.removeCallbacks(activeRunnable);
