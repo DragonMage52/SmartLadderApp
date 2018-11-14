@@ -147,10 +147,16 @@ public class Meter {
                 Log.d("TEST", "Failed to convert last calibration date");
             }
         }
+        else {
+            mLastCalibration = null;
+        }
         lastUpdate = Calendar.getInstance().getTime();
 
         if(caldueinterval != null) {
             mCalDueInternal = Integer.parseInt(caldueinterval);
+        }
+        else {
+            mCalDueInternal = 0;
         }
 
         mActive = true;

@@ -3,10 +3,12 @@ package com.versuscodice.smartladderapp;
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -21,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -76,214 +79,194 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
-    private String SERVICE_NAME = "Smart Ladder";
-    private String SERVICE_TYPE = "_http._udp";
-    private NsdManager mNsdManager;
-    private ClientListen udpConnect;
-    public List<Meter> meters;
-
-    public List<Meter> backgroundMeters = new ArrayList<>();
     private MeterAdapter meterAdapter;
     public TextView txtAlarms;
     public GridView gridview;
-    public Handler mMulticastSendHandler = new Handler();
-    public DatagramSocket udpSocket;
-    public int mListenPort;
     public boolean mBackground = true;
     public GridViewModel mModel;
+    CommunicationService mService;
 
     SharedPreferences mPrefs;
 
-    public int mExternalStoragePermmisions = 0;
-
     String mSSID;
+    int mAlarmSetting;
+
+    boolean mServiceBound = false;
+
+    public List<Meter> meters = new ArrayList<>();
+    public List<Meter> backgroundMeters = new ArrayList<>();
+
     boolean connectedToWifi = false;
 
     int mCalibrationReminder;
 
-    int mAlarmSetting;
-
-    public ServerSocket mServerSocket = null;
-    public SocketListenThread mServerSocketThread = null;
-
     int mPendingClearMeter = -1;
     int mPendingInsertionMeter = -1;
+
+    public int mExternalStoragePermmisions = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        setTheme(R.style.AppTheme);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = new Intent(this, CommunicationService.class);
+        startService(intent);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        //mModel = ViewModelProviders.of(this).get(GridViewModel.class);
+        //meters = mModel.getMeterList();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
         mAlarmSetting = Integer.parseInt(sharedPref.getString("pref_appAlarm", "0"));
-        mCalibrationReminder = NumberPickerPreference.value;
-
-        mModel = ViewModelProviders.of(this).get(GridViewModel.class);
-        meters = mModel.getMeterList();
-
-        String metersID[] = new String[24];
-
-        Gson gson = new Gson();
-        mPrefs = getPreferences(MODE_PRIVATE);
-        String storedIDs = mPrefs.getString("IDs", "");
-
-        if(meters.size() < 1) {
-            metersID = gson.fromJson(storedIDs, metersID.getClass());
-
-            if (metersID != null) {
-                for (int i = 0; i < 24 | i < metersID.length; i++) {
-                    if (i < metersID.length && metersID[i] != null) {
-                        meters.add(new Meter(metersID[i]));
-                    } else {
-                        meters.add(new Meter());
-                    }
-                }
-            } else {
-                for (int i = 0; i < 24; i++) {
-                    meters.add(new Meter());
-                }
-            }
-        }
-
-        gridview = (GridView) findViewById(R.id.gridView);
-        int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            gridview.setNumColumns(4);
-        } else {
-            gridview.setNumColumns(2);
-        }
-        ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
-        meterAdapter = new MeterAdapter(this, meters, btnSilence);
-        gridview.setAdapter(meterAdapter);
-
-        Meter.setContext(this, meterAdapter);
-
-        txtAlarms = (TextView) findViewById(R.id.txtAlarms);
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
-
-                final int finalSelectedMeterPosition = i;
-
-                PopupMenu popup = new PopupMenu(getApplicationContext(), view);
-                MenuInflater inflater = popup.getMenuInflater();
-                inflater.inflate(R.menu.menu_meter, popup.getMenu());
-
-                if (meters.get(i).mActive) {
-                    popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
-                    popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
-                    popup.getMenu().add(Menu.NONE, 3, Menu.NONE, "Clear Log");
-                    popup.getMenu().add(Menu.NONE, 4, Menu.NONE, "Version " + meters.get(i).version).setEnabled(false);
-
-                }
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-
-                        DatagramPacket packet;
-                        SendThread sendThread;
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                        switch (menuItem.getItemId()) {
-                            case R.id.itemChooseMeter:
-
-                                SubMenu meterMenu = menuItem.getSubMenu();
-
-                                for (Meter testMeter : backgroundMeters) {
-                                    meterMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, testMeter.id);
-                                }
-                                return true;
-
-                            case R.id.itemNone:
-                                Meter meterTest = meters.get(finalSelectedMeterPosition);
-                                if (meterTest.id != null) {
-                                    backgroundMeters.add(meters.get(finalSelectedMeterPosition));
-                                }
-                                meters.set(finalSelectedMeterPosition, new Meter());
-                                meterAdapter.notifyDataSetChanged();
-                                return true;
-
-                            case 3:
-                                builder.setMessage("Are you sure you want to clear the log for " + meters.get(i).id +"?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
-                                mPendingClearMeter = i;
-                                break;
-
-                            case 2:
-                                builder.setMessage("Are you sure you want to reset the insertion count for " + meters.get(i).id +"?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
-                                mPendingInsertionMeter = i;
-
-                                break;
-
-                            case 1:
-                                meters.get(i).sendData("Log");
-
-                                break;
-
-                            case 0:
-                                for (int i = 0; i < backgroundMeters.size(); i++) {
-                                    if (menuItem.getTitle().equals(backgroundMeters.get(i).id)) {
-                                        Meter meterTemp = meters.get(finalSelectedMeterPosition);
-                                        Meter backgroundMeterTemp = backgroundMeters.get(i);
-
-                                        meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
-                                        if (meterTemp.id != null) {
-                                            backgroundMeters.set(i, meterTemp);
-                                        } else {
-                                            backgroundMeters.remove(i);
-                                        }
-                                        meterAdapter.notifyDataSetChanged();
-                                        return true;
-                                    }
-                                }
-                                break;
-                        }
-                        return false;
-                    }
-                });
-
-                popup.show();
-            }
-        });
 
         //mNsdManager = (NsdManager) getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.net.wifi.STATE_CHANGE");
         registerReceiver(wifiReceiver, intentFilter);
+    }
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo.isConnected()) {
-            checkWifiState();
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            CommunicationService.CommunicationBinder binder = (CommunicationService.CommunicationBinder) iBinder;
+            mService = binder.getService();
+            mService.mThat = MainActivity.this;
+            meters = mService.meters;
+            backgroundMeters = mService.backgroundMeters;
+
+            setTheme(R.style.AppTheme);
+
+            gridview = (GridView) findViewById(R.id.gridView);
+            int orientation = getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                gridview.setNumColumns(4);
+            } else {
+                gridview.setNumColumns(2);
+            }
+            ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
+            meterAdapter = new MeterAdapter(MainActivity.this, meters, btnSilence);
+            gridview.setAdapter(meterAdapter);
+
+            Meter.setContext(MainActivity.this, meterAdapter);
+
+            txtAlarms = (TextView) findViewById(R.id.txtAlarms);
+
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+
+                    final int finalSelectedMeterPosition = i;
+
+                    PopupMenu popup = new PopupMenu(getApplicationContext(), view);
+                    MenuInflater inflater = popup.getMenuInflater();
+                    inflater.inflate(R.menu.menu_meter, popup.getMenu());
+
+                    if (meters.get(i).mActive) {
+                        popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
+                        popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
+                        popup.getMenu().add(Menu.NONE, 3, Menu.NONE, "Clear Log");
+                        popup.getMenu().add(Menu.NONE, 4, Menu.NONE, "Version " + meters.get(i).version).setEnabled(false);
+
+                    }
+
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem menuItem) {
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                            switch (menuItem.getItemId()) {
+                                case R.id.itemChooseMeter:
+
+                                    SubMenu meterMenu = menuItem.getSubMenu();
+
+                                    for (Meter testMeter : backgroundMeters) {
+                                        meterMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, testMeter.id);
+                                    }
+                                    return true;
+
+                                case R.id.itemNone:
+                                    Meter meterTest = meters.get(finalSelectedMeterPosition);
+                                    if (meterTest.id != null) {
+                                        backgroundMeters.add(meters.get(finalSelectedMeterPosition));
+                                    }
+                                    meters.set(finalSelectedMeterPosition, new Meter());
+                                    meterAdapter.notifyDataSetChanged();
+                                    return true;
+
+                                case 3:
+                                    builder.setMessage("Are you sure you want to clear the log for " + meters.get(i).id + "?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+                                    mPendingClearMeter = i;
+                                    break;
+
+                                case 2:
+                                    builder.setMessage("Are you sure you want to reset the insertion count for " + meters.get(i).id + "?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+                                    mPendingInsertionMeter = i;
+
+                                    break;
+
+                                case 1:
+                                    meters.get(i).sendData("Log");
+
+                                    break;
+
+                                case 0:
+                                    for (int i = 0; i < backgroundMeters.size(); i++) {
+                                        if (menuItem.getTitle().equals(backgroundMeters.get(i).id)) {
+                                            Meter meterTemp = meters.get(finalSelectedMeterPosition);
+                                            Meter backgroundMeterTemp = backgroundMeters.get(i);
+
+                                            meters.set(finalSelectedMeterPosition, backgroundMeterTemp);
+                                            if (meterTemp.id != null) {
+                                                backgroundMeters.set(i, meterTemp);
+                                            } else {
+                                                backgroundMeters.remove(i);
+                                            }
+                                            meterAdapter.notifyDataSetChanged();
+                                            return true;
+                                        }
+                                    }
+                                    break;
+                            }
+                            return false;
+                        }
+                    });
+
+                    popup.show();
+                }
+            });
+
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            if (networkInfo.isConnected()) {
+                checkWifiState();
+            }
+
+            mServiceBound = true;
         }
 
-        mMulticastSendHandler.post(multicastSendRunnable);
-        /*udpConnect = new ClientListen();
-        udpConnect.start();*/
-
-        mServerSocketThread = new SocketListenThread();
-        mServerSocketThread.start();
-
-    }
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService = null;
+            mServiceBound = false;
+        }
+    };
 
     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            switch (which){
+            switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
-                    if(mPendingClearMeter != -1) {
+                    if (mPendingClearMeter != -1) {
                         meters.get(mPendingClearMeter).sendData("Clear");
                         mPendingClearMeter = -1;
-                    }
-                    else if(mPendingInsertionMeter != -1) {
+                    } else if (mPendingInsertionMeter != -1) {
                         meters.get(mPendingInsertionMeter).sendData("Insertion");
                         mPendingInsertionMeter = -1;
                     }
@@ -297,52 +280,31 @@ public class MainActivity extends AppCompatActivity  {
         }
     };
 
-    public Runnable multicastSendRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                byte[] message = (ip + "," + mListenPort).getBytes();
-                InetAddress group = InetAddress.getByName("239.52.8.234");
-                DatagramPacket packet = new DatagramPacket(message, message.length, group, 52867);
-                SendThread sendThread = new SendThread(packet);
-                sendThread.start();
-                if(mBackground) {
-                    mMulticastSendHandler.postDelayed(multicastSendRunnable, 10000);
-                }
-
-            } catch (IOException e) {
-                Log.e("multicastSend", "Failed to send");
-            }
-        }
-    };
-
     private final BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if(action.equals("android.net.wifi.STATE_CHANGE")) {
+            if (action.equals("android.net.wifi.STATE_CHANGE")) {
                 checkWifiState();
             }
         }
     };
 
     public void checkWifiState() {
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService (Context.WIFI_SERVICE);
-        WifiInfo info = wifiManager.getConnectionInfo ();
-        String ssid = info.getSSID().replace("\"", "");
-        Log.d("TEST", "SSID = " + ssid);
-        if (ssid.equals(mSSID)) {
-            connectedToWifi = true;
-            meterAdapter.refresh();
+        if(mService != null) {
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = wifiManager.getConnectionInfo();
+            String ssid = info.getSSID().replace("\"", "");
+            Log.d("TEST", "SSID = " + ssid);
+            if (ssid.equals(mSSID)) {
+                connectedToWifi = true;
+                meterAdapter.refresh();
+            } else {
+                connectedToWifi = false;
+                txtAlarms.setText("ALARM-NETWORK-ERROR");
+                txtAlarms.setVisibility(View.VISIBLE);
+            }
         }
-        else {
-            connectedToWifi = false;
-            txtAlarms.setText("ALARM-NETWORK-ERROR");
-            txtAlarms.setVisibility(View.VISIBLE);
-        }
-
     }
 
     @Override
@@ -367,11 +329,9 @@ public class MainActivity extends AppCompatActivity  {
                 File defaultDir = Environment.getExternalStorageDirectory();
                 final File logFile = new File(defaultDir, fileName);
 
-                if(!isStoragePermissionGranted()) {
-                    while(mExternalStoragePermmisions == 0);
-                }
+                isStoragePermissionGranted();
 
-                if(mExternalStoragePermmisions == 1) {
+                if (isStoragePermissionGranted()) {
                     try {
                         FileOutputStream outputStream = new FileOutputStream(logFile);
                         outputStream.write(finalArrayMap.get("log").getBytes());
@@ -395,7 +355,7 @@ public class MainActivity extends AppCompatActivity  {
 
                 final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(that);
                 String logDir = sharedPref.getString("logDir", "");
-                if(logDir.equals("")) {
+                if (logDir.equals("")) {
                     logDir = defaultDir.getPath();
                 }
 
@@ -436,11 +396,11 @@ public class MainActivity extends AppCompatActivity  {
                                         final File finalLogFile = new File(path, fileName);
                                         Log.d("TEST", "logFile path: " + finalLogFile.getAbsolutePath());
 
-                                        if(!isStoragePermissionGranted()) {
-                                            while(mExternalStoragePermmisions == 0);
+                                        if (!isStoragePermissionGranted()) {
+                                            while (mExternalStoragePermmisions == 0) ;
                                         }
 
-                                        if(mExternalStoragePermmisions == 1) {
+                                        if (mExternalStoragePermmisions == 1) {
                                             try {
                                                 FileOutputStream outputStream = new FileOutputStream(finalLogFile);
                                                 outputStream.write(finalArrayMap.get("log").getBytes());
@@ -474,80 +434,72 @@ public class MainActivity extends AppCompatActivity  {
         });
     }
 
-    public  boolean isStoragePermissionGranted() {
+    public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.d("TEST","Permission is granted");
+                Log.d("TEST", "Permission is granted");
                 mExternalStoragePermmisions = 1;
                 return true;
-            } else {
-
-                Log.d("TEST","Permission is revoked");
+            }
+            else {
+                Log.d("TEST", "Permission is revoked");
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 mExternalStoragePermmisions = 0;
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.d("TEST","Permission is granted");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.d("TEST", "Permission is granted");
             mExternalStoragePermmisions = 1;
             return true;
         }
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("TEST", "Permission: " + permissions[0] + "was " + grantResults[0]);
+                //resume tasks needing this permission
+                mExternalStoragePermmisions = 1;
+            } else {
+                mExternalStoragePermmisions = -1;
+            }
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         //mNsdManager.unregisterService(mRegistrationListener);
-        try {
+        /*try {
             mServerSocketThread.close();
         } catch (Exception e) {
             Log.d("onDestroy", "Failed to close ServerSocket");
-        }
+        }*/
+        /*if(mService != null) {
+            mService.unBind();
+            unbindService(mConnection);
+        }*/
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
 
-        try {
-            mServerSocketThread.close();
-            mBackground = false;
-        } catch (Exception e) {
-            Log.d("TEST", "Failed on Pause");
-        }
-
-        mMulticastSendHandler.removeCallbacks(multicastSendRunnable);
-
-        String metersID[] = new String[24];
-        int count = 0;
-
-        for (Meter testMeter : meters) {
-            if (testMeter.id != null) {
-                metersID[count] = testMeter.id;
-            }
-            count++;
-
-            if(testMeter.mSocket != null) {
-                //testMeter.mManageThread.close();
-                testMeter.sendData("close");
-            }
-        }
-
-        for (Meter testMeter : backgroundMeters) {
-            if (testMeter.mSocket != null) {
-                //testMeter.mManageThread.close();
-                testMeter.sendData("close");
-            }
-        }
-
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(metersID);
-        prefsEditor.putString("IDs", json);
-        prefsEditor.commit();
-
         unregisterReceiver(wifiReceiver);
+        if(mService != null) {
+            mService.unBind();
+        }
+
+        if(mServiceBound) {
+            try {
+                unbindService(mConnection);
+            }
+            catch(IllegalArgumentException e) {
+                Log.e("TEST", "Failed to unbind service");
+            }
+        }
 
         super.onPause();
     }
@@ -555,39 +507,27 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mServerSocketThread != null) {
+        /*if (mServerSocketThread != null) {
             if (!mServerSocketThread.isAlive()) {
                 mServerSocketThread = new SocketListenThread();
                 mServerSocketThread.start();
             }
-        }
+        }*/
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            mSSID = sharedPref.getString("perf_appWifiSSID", "");
-            mAlarmSetting = Integer.parseInt(sharedPref.getString("perf_appAlarm", "0"));
-            mCalibrationReminder = NumberPickerPreference.value;
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mSSID = sharedPref.getString("perf_appWifiSSID", "");
+        mAlarmSetting = Integer.parseInt(sharedPref.getString("perf_appAlarm", "0"));
+        mCalibrationReminder = NumberPickerPreference.value;
 
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction("android.net.wifi.STATE_CHANGE");
-            registerReceiver(wifiReceiver, intentFilter);
-            checkWifiState();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.wifi.STATE_CHANGE");
+        registerReceiver(wifiReceiver, intentFilter);
+        checkWifiState();
 
         mBackground = true;
-        mMulticastSendHandler.post(multicastSendRunnable);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            Log.d("TEST","Permission: "+permissions[0]+ "was "+grantResults[0]);
-            //resume tasks needing this permission
-            mExternalStoragePermmisions = 1;
-        }
-        else {
-            mExternalStoragePermmisions = -1;
-        }
-    }
+
 
     public void registerService(int port) {
         Log.d("TEST", "udp port: " + port);
@@ -596,7 +536,7 @@ public class MainActivity extends AppCompatActivity  {
         serviceInfo.setServiceType("_zvs._udp.");
         serviceInfo.setPort(port);
 
-        mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+        //mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
         //mNsdManager.unregisterService(mRegistrationListener);
         //mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
@@ -640,242 +580,6 @@ public class MainActivity extends AppCompatActivity  {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public class SocketListenThread extends Thread {
-        private boolean run = true;
-
-        @Override
-        public void run() {
-            try {
-                mServerSocket = new ServerSocket(8975);
-                mListenPort = mServerSocket.getLocalPort();
-            }
-            catch (IOException e) {
-                Log.e("SocketListenThread", "Failed to open socket");
-            }
-
-            while(run) {
-
-                Socket socket = null;
-                try {
-                    socket = mServerSocket.accept();
-                    String ip = socket.getRemoteSocketAddress().toString();
-                    Log.d("Test", "Found ip: " + ip);
-                    final Socket finalSocket = socket;
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Meter newMeter = new Meter();
-                            newMeter.openConnection(finalSocket);
-                        }
-                    });
-                } catch (IOException e1) {
-                    Log.e("SocketListenThread", "Failed to accept client");
-                }
-            }
-        }
-
-        public void close() {
-            run = false;
-            try {
-                mServerSocket.close();
-            } catch (IOException e) {
-                Log.d("close ServerSocketThread", "Failed to close server socket");
-            }
-        }
-    }
-
-    public class ClientListen extends Thread {
-        private boolean run = true;
-
-        @Override
-        public void run() {
-            try {
-                run = true;
-
-
-                udpSocket = new DatagramSocket();
-
-                byte[] message = new byte[8000];
-                DatagramPacket packet = new DatagramPacket(message, message.length);
-                mListenPort = udpSocket.getLocalPort();
-                //registerService(udpSocket.getLocalPort());
-                while (run) {
-                    udpSocket.receive(packet);
-                    //socket.receive(packet);
-                    String text = new String(message, 0, packet.getLength());
-                    Log.d("Received data", text);
-                    Gson gson = new Gson();
-                    final ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
-
-                    if (arrayMap.get("command").equals("log")) {
-
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
-                        String date = dateFormat.format(Calendar.getInstance().getTime());
-
-
-                        //final String fileName = date +  arrayMap.get("id") + " events.log";
-                        final String fileName = "events.log";
-
-                        //File logDir = getApplicationContext().getDir("logs", Context.MODE_PRIVATE);
-                        File logDir = Environment.getExternalStorageDirectory();
-                        final File logFile = new File(logDir, fileName);
-                        Log.d("TEST", "logFile path: " + logFile.getAbsolutePath());
-
-                        if(!isStoragePermissionGranted()) {
-                            while(mExternalStoragePermmisions == 0);
-                        }
-
-                        if(mExternalStoragePermmisions == 1) {
-                            try {
-                                FileOutputStream outputStream = new FileOutputStream(logFile);
-                                outputStream.write(arrayMap.get("log").getBytes());
-                                outputStream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                View logView = layoutInflater.inflate(R.layout.popup_log, null);
-
-                                TextView txtLog = logView.findViewById(R.id.txtLog);
-                                String test = arrayMap.get("log");
-                                txtLog.append(arrayMap.get("log"));
-                                DisplayMetrics displayMetrics = new DisplayMetrics();
-                                WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                                windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
-
-                                final PopupWindow popupWindow = new PopupWindow(logView, displayMetrics.widthPixels - 60, displayMetrics.heightPixels - 60, true);
-                                popupWindow.showAtLocation(gridview, Gravity.CENTER, 0, 0);
-
-                                Button btnClose = logView.findViewById(R.id.btnClosePopup);
-                                btnClose.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        popupWindow.dismiss();
-                                    }
-                                });
-
-                                Button btnEmail = logView.findViewById(R.id.btnEmail);
-                                btnEmail.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        if (mExternalStoragePermmisions == 1) {
-                                            Intent intent = new Intent(Intent.ACTION_SEND);
-                                            intent.setType("*/*");
-                                            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "com.versuscodice.provider", logFile));
-                                            if (intent.resolveActivity(getPackageManager()) != null) {
-                                                startActivity(intent);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    } else if (arrayMap.get("command").equals("update")) {
-
-                        boolean found = false;
-
-                        for (Meter testMeter : meters) {
-                            if (testMeter.id != null) {
-                                if (testMeter.id.equals(arrayMap.get("id"))) {
-                                    testMeter.update(arrayMap);
-                                    testMeter.mIpAddress = packet.getAddress();
-                                    found = true;
-                                }
-                            }
-                        }
-
-                        if (found == false) {
-                            for (Meter testMeter : backgroundMeters) {
-                                if (testMeter.id.equals(arrayMap.get("id"))) {
-                                    testMeter.update(arrayMap);
-                                    testMeter.mIpAddress = packet.getAddress();
-                                    found = true;
-                                }
-                            }
-
-                        }
-
-                        if (found == false) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    backgroundMeters.add(new Meter(arrayMap));
-                                }
-                            });
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                meterAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    }
-
-                }
-                udpSocket.close();
-            } catch (IOException e) {
-                Log.e("TEST", "error: ", e);
-                udpSocket.close();
-                run = false;
-            }
-
-        }
-
-        public void close() {
-            run = false;
-        }
-
-
-
-        public  boolean isStoragePermissionGranted() {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("TEST","Permission is granted");
-                    mExternalStoragePermmisions = 1;
-                    return true;
-                } else {
-
-                    Log.d("TEST","Permission is revoked");
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    mExternalStoragePermmisions = 0;
-                    return false;
-                }
-            }
-            else { //permission is automatically granted on sdk<23 upon installation
-                Log.d("TEST","Permission is granted");
-                mExternalStoragePermmisions = 1;
-                return true;
-            }
-        }
-    }
-
-    class SendThread extends Thread {
-
-        private DatagramPacket mPacket;
-
-        public SendThread(DatagramPacket packet) {
-            mPacket = packet;
-        }
-
-        public void run() {
-            try {
-                DatagramSocket udpSocket = new DatagramSocket();
-                udpSocket.send(mPacket);
-                udpSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
