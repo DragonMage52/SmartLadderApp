@@ -2,12 +2,15 @@ package com.versuscodice.smartladderapp;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
@@ -78,17 +81,39 @@ public class CommunicationService extends Service {
     public void onCreate() {
         Toast.makeText(this, "service creating", Toast.LENGTH_SHORT).show();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        mNotification =
-                new Notification.Builder(this)
-                        .setContentText("Ladder Status: ")
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentIntent(pendingIntent)
-                        .build();
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        startForeground(1234, mNotification);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelID = "smartladder_channel_01";
+            String channelName = "SafeAir Ladder";
+            String channelDescription = "Notification for Safe Air Ladder Communication";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+
+            NotificationChannel channel = new NotificationChannel(channelID, channelName, importance);
+            channel.setDescription(channelDescription);
+
+            notificationManager.createNotificationChannel(channel);
+
+            mNotification = new Notification.Builder(this, channelID)
+                    .setContentTitle("SafeAir Ladder")
+                    .setContentText("TEST")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(pendingIntent)
+                    .setChannelId(channelID)
+                    .build();
+        }
+        else {
+            mNotification = new Notification.Builder(this)
+                    .setContentTitle("SafeAir Ladder")
+                    .setContentText("TEST")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(pendingIntent)
+                    .build();
+        }
+
+        startForeground(52, mNotification);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
