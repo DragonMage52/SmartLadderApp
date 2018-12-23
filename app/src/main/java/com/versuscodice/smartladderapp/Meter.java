@@ -268,6 +268,7 @@ public class Meter {
         public void run() {
 
             byte buffer [] = new byte[100000];
+            String strBuffer = "";
             int test;
 
             try {
@@ -276,35 +277,43 @@ public class Meter {
                 e.printStackTrace();
             }
 
-
             run = true;
             while(run) {
                 try {
-                    if((test = dataIn.read(buffer)) > 0) {
-                        String text = new String(buffer, 0, test).trim();
-                        Log.d("Received data", text);
+                    do {
+                        if((test = dataIn.read(buffer)) > 0) {
+                            String text = new String(buffer, 0, test).trim();
+                            //Log.d("Received data", text);
 
-                        mActiveHandler.removeCallbacks(activeRunnable);
-                        mActiveHandler.postDelayed(activeRunnable, 10000);
+                            strBuffer = strBuffer + text;
 
-                        try {
-                            Gson gson = new Gson();
-                            ArrayMap<String, String> arrayMap = gson.fromJson(text, ArrayMap.class);
-                            if(arrayMap.get("command").equals("update")) {
-                                update(arrayMap);
-                            }
-                            else if(arrayMap.get("command").equals("log")) {
-                                mThat.displayLog(arrayMap, id);
-                            }
-                        } catch(Exception e) {
-                            Log.d("Test", "Failed convert");
+                            Log.d("TEST", "strBuffer = " + strBuffer);
+
+                            mActiveHandler.removeCallbacks(activeRunnable);
+                            mActiveHandler.postDelayed(activeRunnable, 10000);
                         }
+                    }while(strBuffer.indexOf('}') == -1);
 
+                    String message = strBuffer.substring(strBuffer.indexOf('{'), strBuffer.indexOf('}')+1);
+                    strBuffer = "";
+
+                    try {
+                        Gson gson = new Gson();
+                        ArrayMap<String, String> arrayMap = gson.fromJson(message, ArrayMap.class);
+                        if(arrayMap.get("command").equals("update")) {
+                            update(arrayMap);
+                        }
+                        else if(arrayMap.get("command").equals("log")) {
+                            mThat.displayLog(arrayMap, id);
+                        }
+                        else if(arrayMap.get("command").equals("date")) {
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                            sendData("Date," + format.format(Calendar.getInstance().getTime()));
+                        }
+                    } catch(Exception e) {
+                        Log.d("Test", "Failed convert");
                     }
-                    else {
-                        Log.d("TEST", "break out of recieve loop");
-                        break;
-                    }
+
                 } catch (IOException e) {
                     Log.e("ClientManageThread", "Failed to open input stream");
                     close();
