@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
@@ -19,7 +20,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.text.format.Formatter;
@@ -31,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class CommunicationService extends Service {
 
@@ -85,7 +92,7 @@ public class CommunicationService extends Service {
 
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelID = "smartladder_channel_01";
             String channelName = "SafeAir Ladder";
             String channelDescription = "Notification for Safe Air Ladder Communication";
@@ -98,16 +105,15 @@ public class CommunicationService extends Service {
 
             mNotification = new Notification.Builder(this, channelID)
                     .setContentTitle("SafeAir Ladder")
-                    .setContentText("TEST")
+                    .setContentText("Operation Normal")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent)
                     .setChannelId(channelID)
                     .build();
-        }
-        else {
+        } else {
             mNotification = new Notification.Builder(this)
                     .setContentTitle("SafeAir Ladder")
-                    .setContentText("TEST")
+                    .setContentText("Operation Normal")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent)
                     .build();
@@ -123,7 +129,7 @@ public class CommunicationService extends Service {
         Gson gson = new Gson();
         String storedIDs = sharedPref.getString("IDs", "");
 
-        if(meters.size() < 1) {
+        if (meters.size() < 1) {
             metersID = gson.fromJson(storedIDs, metersID.getClass());
 
             if (metersID != null) {
@@ -140,6 +146,8 @@ public class CommunicationService extends Service {
                 }
             }
         }
+
+        Meter.mService = (CommunicationService) this;
 
         mMulticastSendHandler.post(multicastSendRunnable);
 
@@ -181,7 +189,7 @@ public class CommunicationService extends Service {
             }
             count++;
 
-            if(testMeter.mSocket != null) {
+            if (testMeter.mSocket != null) {
                 //testMeter.mManageThread.close();
                 testMeter.sendData("close");
             }
@@ -220,6 +228,145 @@ public class CommunicationService extends Service {
         sharedPrefEditor.commit();
     }
 
+    private MediaPlayer mRingtone;
+    private Vibrator mVibrate;
+    private TextToSpeech mTextToSpeech;
+    private UtteranceProgressListener mUtteranceProgressListener;
+    int mAlarmSetting;
+    long[] mVibratePattern = {0, 500, 500};
+
+    public void refresh() {
+        int totalAlarms = 0;
+        boolean playRingtone = false;
+        final CommunicationService finalThis = (CommunicationService) this;
+
+        for (Meter testMeter : meters) {
+            if (testMeter.mAlarmState && testMeter.mActive) {
+                totalAlarms++;
+            }
+            if (testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                playRingtone = true;
+            }
+        }
+
+        if (mRingtone == null) {
+            mRingtone = MediaPlayer.create(finalThis, Settings.System.DEFAULT_RINGTONE_URI);
+        }
+        if (mVibrate == null) {
+            mVibrate = (Vibrator) finalThis.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+
+        if (playRingtone) {
+            switch (finalThis.mAlarmSetting) {
+                case 1:
+                    mVibrate.vibrate(mVibratePattern, 0);
+                    break;
+
+                case 2:
+                    if (!mRingtone.isPlaying()) {
+                        mRingtone = MediaPlayer.create(finalThis, Settings.System.DEFAULT_RINGTONE_URI);
+                        mRingtone.start();
+                    }
+                    break;
+
+                case 3:
+                    if (!mRingtone.isPlaying()) {
+                        mRingtone = MediaPlayer.create(finalThis, Settings.System.DEFAULT_RINGTONE_URI);
+                        mRingtone.start();
+                    }
+                    mVibrate.vibrate(mVibratePattern, 0);
+                    break;
+
+                case 4:
+                    if (mTextToSpeech == null) {
+                        mTextToSpeech = new TextToSpeech(finalThis.getApplicationContext(), new TextToSpeech.OnInitListener() {
+                            @Override
+                            public void onInit(int status) {
+                                mTextToSpeech.setLanguage(Locale.US);
+                                mTextToSpeech.setSpeechRate(0.75f);
+                                String voiceMessage = "";
+                                for (Meter testMeter : meters) {
+                                    if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                        voiceMessage += "Alarm  " + testMeter.id + ". ";
+                                    }
+                                }
+
+                                mUtteranceProgressListener = new UtteranceProgressListener() {
+                                    @Override
+                                    public void onStart(String s) {
+
+                                    }
+
+                                    @Override
+                                    public void onDone(String s) {
+                                        String voiceMessage = "";
+                                        for (Meter testMeter : meters) {
+                                            if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                                voiceMessage += "Alarm  " + testMeter.id + ". ";
+                                            }
+                                        }
+
+                                        mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null, "alarmSpeech");
+                                    }
+
+                                    @Override
+                                    public void onError(String s) {
+
+                                    }
+                                };
+
+                                mTextToSpeech.setOnUtteranceProgressListener(mUtteranceProgressListener);
+
+                                mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null, "alarmSpeech");
+                            }
+                        });
+                    } else {
+                        if (!mTextToSpeech.isSpeaking()) {
+                            String voiceMessage = "";
+                            for (Meter testMeter : meters) {
+                                if (testMeter.mAlarmState && testMeter.mAlarmSilenceState == 1 && testMeter.mActive) {
+                                    voiceMessage += "Alarm on " + testMeter.id + ". ";
+                                }
+                            }
+                            mTextToSpeech.speak(voiceMessage, TextToSpeech.QUEUE_FLUSH, null);
+                        }
+                    }
+                    break;
+            }
+            Meter.mMeterAdapter.mBtnSilence.setVisibility(View.VISIBLE);
+        } else {
+            if (mRingtone.isPlaying()) {
+                mRingtone.stop();
+            }
+            if (mTextToSpeech != null) {
+                if (mTextToSpeech.isSpeaking()) {
+                    mTextToSpeech.stop();
+                    mTextToSpeech.shutdown();
+                    mTextToSpeech = null;
+                }
+            }
+            mVibrate.cancel();
+            Meter.mMeterAdapter.mBtnSilence.setVisibility(View.INVISIBLE);
+        }
+
+        final int finalTotalAlarm = totalAlarms;
+
+        if(mThat != null) {
+
+            mThat.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (finalTotalAlarm > 0) {
+                        mThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
+                        mThat.txtAlarms.setVisibility(View.VISIBLE);
+                    } else {
+                        mThat.txtAlarms.setVisibility(View.INVISIBLE);
+                    }
+                }
+            });
+        }
+    }
+
     public class SocketListenThread extends Thread {
         private boolean run = true;
 
@@ -240,6 +387,8 @@ public class CommunicationService extends Service {
                     String ip = socket.getRemoteSocketAddress().toString();
                     Log.d("Test", "Found ip: " + ip);
                     final Socket finalSocket = socket;
+
+                    while(mThat == null);
 
                     mThat.runOnUiThread(new Runnable() {
                         @Override

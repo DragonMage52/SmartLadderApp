@@ -89,6 +89,8 @@ public class Meter {
 
     int mCalDueInternal = 0;
 
+    public static CommunicationService mService;
+
     public Meter() {
 
     }
@@ -209,6 +211,8 @@ public class Meter {
             @Override
             public void run() {
                 mMeterAdapter.notifyDataSetChanged();
+                mService.refresh();
+
             }
         });
     }
@@ -226,6 +230,7 @@ public class Meter {
                         @Override
                         public void run() {
                             mMeterAdapter.notifyDataSetChanged();
+                            mService.refresh();
                         }
                     });
                 } else {
@@ -294,8 +299,15 @@ public class Meter {
                         }
                     }while(strBuffer.indexOf('}') == -1);
 
-                    String message = strBuffer.substring(strBuffer.indexOf('{'), strBuffer.indexOf('}')+1);
-                    strBuffer = "";
+                    String message = "";
+                    try {
+                        message = strBuffer.substring(strBuffer.indexOf('{'), strBuffer.indexOf('}') + 1);
+                        strBuffer = "";
+                    }
+                    catch (StringIndexOutOfBoundsException e) {
+                        Log.d("TEST", "out of bounds");
+                        return;
+                    }
 
                     try {
                         Gson gson = new Gson();

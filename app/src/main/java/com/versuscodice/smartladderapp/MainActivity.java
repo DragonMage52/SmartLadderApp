@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
             CommunicationService.CommunicationBinder binder = (CommunicationService.CommunicationBinder) iBinder;
             mService = binder.getService();
             mService.mThat = MainActivity.this;
+            mService.mAlarmSetting = mAlarmSetting;
             meters = mService.meters;
             backgroundMeters = mService.backgroundMeters;
 
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("TEST", "SSID = " + ssid);
             if (ssid.equals(mSSID)) {
                 connectedToWifi = true;
-                meterAdapter.refresh();
+                mService.refresh();
             } else {
                 connectedToWifi = false;
                 txtAlarms.setText("ALARM-NETWORK-ERROR");
@@ -517,6 +518,9 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mSSID = sharedPref.getString("perf_appWifiSSID", "");
         mAlarmSetting = Integer.parseInt(sharedPref.getString("perf_appAlarm", "0"));
+        if(mService != null) {
+            mService.mAlarmSetting = mAlarmSetting;
+        }
         mCalibrationReminder = NumberPickerPreference.value;
 
         IntentFilter intentFilter = new IntentFilter();

@@ -40,7 +40,7 @@ public class MeterAdapter extends BaseAdapter {
     private Context mContext;
     private List<Meter> meters = new ArrayList<Meter>();
     private MediaPlayer mRingtone;
-    private ImageButton mBtnSilence;
+    public ImageButton mBtnSilence;
     private Vibrator mVibrate;
     private TextToSpeech mTextToSpeech;
     private UtteranceProgressListener mUtteranceProgressListener;
@@ -168,7 +168,7 @@ public class MeterAdapter extends BaseAdapter {
             }
             else {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorDisabled));
-                refresh();
+                //refresh();
                 return view;
             }
 
@@ -222,6 +222,7 @@ public class MeterAdapter extends BaseAdapter {
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
+                Log.d("StableTest", "Background set to Gray");
             }
             else if(thisMeter.mAlarmState) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
@@ -274,12 +275,12 @@ public class MeterAdapter extends BaseAdapter {
                 txtStatus.setText("");
             }
 
-            refresh();
+            //refresh();
 
         return view;
     }
 
-    public void refresh() {
+    /*public void refresh() {
         int totalAlarms = 0;
         boolean playRingtone = false;
         final MainActivity finalThat = (MainActivity) mContext;
@@ -410,7 +411,7 @@ public class MeterAdapter extends BaseAdapter {
                 }
             });
         }
-    }
+    }*/
 
     public void setAllInvisible() {
         //txtTemp.setVisibility(View.INVISIBLE);
