@@ -222,7 +222,6 @@ public class MeterAdapter extends BaseAdapter {
 
             if(!thisMeter.mActive) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorOff));
-                Log.d("StableTest", "Background set to Gray");
             }
             else if(thisMeter.mAlarmState) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));

@@ -6,12 +6,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
@@ -26,7 +30,9 @@ import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -88,9 +94,22 @@ public class CommunicationService extends Service {
     public void onCreate() {
         Toast.makeText(this, "service creating", Toast.LENGTH_SHORT).show();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        IntentFilter filter = new IntentFilter("zistos.notification.CLOSE");
+        registerReceiver(mNotificationReceiver, filter);
+
+        Intent notificationCloseIntent = new Intent();
+        notificationCloseIntent.setAction("zistos.notification.CLOSE");
+
+
+        PendingIntent notificationClosePendingIntent = PendingIntent.getBroadcast(this, 0, notificationCloseIntent, 0);
 
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Notification.Action action = new Notification.Action.Builder(Icon.createWithResource(this, R.drawable.ic_close_notification), "Stop", notificationClosePendingIntent).build();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelID = "smartladder_channel_01";
@@ -104,18 +123,20 @@ public class CommunicationService extends Service {
             notificationManager.createNotificationChannel(channel);
 
             mNotification = new Notification.Builder(this, channelID)
-                    .setContentTitle("SafeAir Ladder")
-                    .setContentText("Operation Normal")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(pendingIntent)
+                    .setContentTitle("SafeAir Ladder Communication Service")
+                    //.setContentText("SafeAir Ladder Communication Service")
+                    .setSmallIcon(R.drawable.ic_close_notification_text)
+                    //.setContentIntent(pendingIntent)
                     .setChannelId(channelID)
+                    .addAction(action)
                     .build();
         } else {
             mNotification = new Notification.Builder(this)
                     .setContentTitle("SafeAir Ladder")
-                    .setContentText("Operation Normal")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(pendingIntent)
+                    .setContentText("SafeAir Ladder Communication Service")
+                    .setSmallIcon(R.drawable.ic_close_notification_text)
+                    //.setContentIntent(pendingIntent)
+                    .addAction(action)
                     .build();
         }
 
@@ -154,6 +175,17 @@ public class CommunicationService extends Service {
         mServerSocketThread = new SocketListenThread();
         mServerSocketThread.start();
     }
+
+    private final BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if(mThat != null) {
+                mThat.finish();
+            }
+            stopSelf();
+        }
+    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -201,6 +233,8 @@ public class CommunicationService extends Service {
                 testMeter.sendData("close");
             }
         }
+
+        unregisterReceiver(mNotificationReceiver);
 
         SharedPreferences.Editor sharedPrefEditor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         Gson gson = new Gson();
