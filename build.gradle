@@ -20,6 +20,13 @@ allprojects {
         google()
         jcenter()
         maven { url "https://jitpack.io" }
+        maven {
+            url MAVEN_REPO
+            credentials {
+                username MAVEN_USER
+                password MAVEN_PASSWORD
+            }
+        }
     }
 }
 

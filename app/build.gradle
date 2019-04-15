@@ -31,6 +31,8 @@ dependencies {
 repositories {
     jcenter()
     maven { url "http://code.newtronlabs.com:8081/artifactory/libs-release-local" }
+    mavenCentral()
+    maven {url "https://jitpack.io" }
 }
 
 dependencies {
@@ -71,4 +73,8 @@ dependencies {
 
 dependencies {
     implementation 'com.github.hedzr:android-file-chooser:v1.1.11'
+}
+
+dependencies {
+    compile 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
 }
