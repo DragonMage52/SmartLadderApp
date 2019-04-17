@@ -66,6 +66,8 @@ public class PairingActivity extends AppCompatActivity {
                 TextView txtName = (TextView) findViewById(R.id.edittxtName);
                 String Name = txtName.getText().toString();
 
+                Log.d("TEST", "setting: " + SSID + " " + Password + " " + Name + "\n");
+
                 setStatusText("Searching...");
 
                 AcceptThread acceptThread = new AcceptThread(mBluetoothAdapter, SSID, Password, Name, mActivity);
