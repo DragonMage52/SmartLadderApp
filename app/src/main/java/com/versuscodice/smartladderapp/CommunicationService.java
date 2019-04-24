@@ -57,11 +57,15 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import oscP5.OscMessage;
+import oscP5.OscP5;
 
 public class CommunicationService extends Service {
 
@@ -404,9 +408,45 @@ public class CommunicationService extends Service {
     public class SocketListenThread extends Thread {
         private boolean run = true;
 
+        OscP5 oscP5;
+
+        public SocketListenThread() {
+
+            int listenPort = 14125;
+
+            try {
+                DatagramSocket s = new DatagramSocket();
+                listenPort = s.getLocalPort();
+                s.close();
+            } catch (SocketException e) {
+                Log.d("TEST", "Failed to open test UDP port");
+            }
+            oscP5 = new OscP5(this, listenPort);
+            mListenPort = listenPort;
+        }
+
+        void oscEvent(OscMessage message) {
+            for(Meter testMeter : meters) {
+                if(message.get(0).stringValue().equals(testMeter.id)) {
+                    testMeter.update(message);
+                    return;
+                }
+            }
+
+            for(Meter testMeter : backgroundMeters) {
+                if(message.get(0).stringValue().equals(testMeter.id)) {
+                    testMeter.update(message);
+                    return;
+                }
+            }
+        }
+
         @Override
         public void run() {
-            try {
+
+
+
+            /*try {
                 mServerSocket = new ServerSocket(8975);
                 mListenPort = mServerSocket.getLocalPort();
             } catch (IOException e) {
@@ -435,7 +475,7 @@ public class CommunicationService extends Service {
                 } catch (IOException e1) {
                     Log.e("SocketListenThread", "Failed to accept client");
                 }
-            }
+            }*/
         }
 
         public void close() {

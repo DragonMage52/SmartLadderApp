@@ -26,6 +26,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import oscP5.OscMessage;
+
 /**
  * Created by Spencer Costello on 3/17/2018.
  */
@@ -106,6 +108,11 @@ public class Meter {
     public static void setContext(MainActivity that, MeterAdapter meterAdapter) {
         mThat = that;
         mMeterAdapter = meterAdapter;
+    }
+
+    public void update(OscMessage message) {
+        id = message.get(0).stringValue();
+
     }
 
     public void update(ArrayMap<String, String> arrayMap) {
