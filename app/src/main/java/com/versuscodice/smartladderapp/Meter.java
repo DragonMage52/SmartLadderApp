@@ -112,6 +112,91 @@ public class Meter {
 
     public void update(OscMessage message) {
         id = message.get(0).stringValue();
+        temp = message.get(1).stringValue();
+        meterBatteryLevel = message.get(2).stringValue();
+        mBatteryLevel = message.get(3).stringValue();
+        oxygenLevel = message.get(4).stringValue();
+        carbondioxideLevel = message.get(5).stringValue();
+        hydrogensulfideLevel = message.get(6).stringValue();
+        combExLevel = message.get(7).stringValue();
+        mAlarmState = message.get(8).booleanValue();
+        mWarningState = message.get(9).booleanValue();
+        mManState = message.get(10).booleanValue();
+        mLadderState = message.get(11).booleanValue();
+        mBatteryState = message.get(12).booleanValue();
+        mBluetoothState = message.get(13).booleanValue();
+        mMeterState = message.get(14).booleanValue();
+        mEarlyState = message.get(15).booleanValue();
+        mMeterBatteryState = message.get(16).booleanValue();
+        mEarlyDoneState = message.get(17).booleanValue();
+        mIdleState = message.get(18).booleanValue();
+        mMeterBatteryDangerState = message.get(19).booleanValue();
+        mBatteryDangerState = message.get(20).booleanValue();
+        mAlarmOperator = message.get(21).booleanValue();
+        mAlarmMeterOff = message.get(22).booleanValue();
+        mPort = message.get(23).intValue();
+        mInsertionCount = message.get(24).intValue();
+        version = message.get(25).stringValue();
+
+        lastUpdate = Calendar.getInstance().getTime();
+
+        mActive = true;
+
+        if(mAlarmState && mAlarmSilenceState == 0) {
+            mAlarmSilenceState = 1;
+        }
+        else if(!mAlarmState && (mAlarmSilenceState == 1 || mAlarmSilenceState == -1)) {
+            mAlarmSilenceState = 0;
+        }
+
+        if(!mInitalized) {
+            mInitalized = true;
+
+            boolean found = false;
+            for(int i = 0; i < mThat.meters.size(); i++) {
+                if(mThat.meters.get(i).id != null) {
+                    if(mThat.meters.get(i).id.equals(id)) {
+                        mThat.meters.set(i, this);
+                        found = true;
+                    }
+                }
+            }
+
+            if(!found) {
+                for(int i = 0; i < mThat.backgroundMeters.size(); i++) {
+                    if(mThat.backgroundMeters.get(i).id != null) {
+                        if(mThat.backgroundMeters.get(i).id.equals(id)) {
+                            mThat.backgroundMeters.set(i, this);
+                            found = true;
+                        }
+                    }
+                }
+            }
+
+            if (!found) {
+
+                final Meter finalThisMeter = this;
+
+                mThat.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mThat.backgroundMeters.add(finalThisMeter);
+                    }
+                });
+            }
+        }
+
+        mThat.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mMeterAdapter.notifyDataSetChanged();
+                mService.refresh();
+
+            }
+        });
+
+        mActiveHandler.removeCallbacks(activeRunnable);
+        mActiveHandler.postDelayed(activeRunnable, 10000);
 
     }
 
