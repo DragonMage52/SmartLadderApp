@@ -19,6 +19,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.text.ParseException;
@@ -26,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import oscP5.OscArgument;
 import oscP5.OscMessage;
 
 /**
@@ -111,6 +113,10 @@ public class Meter {
     }
 
     public void update(OscMessage message) {
+
+        String caldueinterval;
+        String dateString;
+
         id = message.get(0).stringValue();
         temp = message.get(1).stringValue();
         meterBatteryLevel = message.get(2).stringValue();
@@ -137,8 +143,29 @@ public class Meter {
         mPort = message.get(23).intValue();
         mInsertionCount = message.get(24).intValue();
         version = message.get(25).stringValue();
+        caldueinterval = message.get(26).stringValue();
+        dateString = message.get(27).stringValue();
+
+        if(!dateString.equals("")) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            try {
+                mLastCalibration = dateFormat.parse(dateString);
+            } catch (ParseException e) {
+                Log.d("TEST", "Failed to convert last calibration date");
+            }
+        }
+        else {
+            mLastCalibration = null;
+        }
 
         lastUpdate = Calendar.getInstance().getTime();
+
+        if(!caldueinterval.equals("")) {
+            mCalDueInternal = Integer.parseInt(caldueinterval);
+        }
+        else {
+            mCalDueInternal = 0;
+        }
 
         mActive = true;
 

@@ -426,17 +426,19 @@ public class CommunicationService extends Service {
         }
 
         void oscEvent(OscMessage message) {
-            for(Meter testMeter : meters) {
-                if(message.get(0).stringValue().equals(testMeter.id)) {
-                    testMeter.update(message);
-                    return;
+            if (message.checkAddrPattern("update")) {
+                for (Meter testMeter : meters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        testMeter.update(message);
+                        return;
+                    }
                 }
-            }
 
-            for(Meter testMeter : backgroundMeters) {
-                if(message.get(0).stringValue().equals(testMeter.id)) {
-                    testMeter.update(message);
-                    return;
+                for (Meter testMeter : backgroundMeters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        testMeter.update(message);
+                        return;
+                    }
                 }
             }
         }
