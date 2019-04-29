@@ -79,6 +79,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import oscP5.OscMessage;
+
 public class MainActivity extends AppCompatActivity {
 
     private MeterAdapter meterAdapter;
@@ -213,7 +215,8 @@ public class MainActivity extends AppCompatActivity {
                                     break;
 
                                 case 1:
-                                    meters.get(i).sendData("Log");
+                                    //meters.get(i).sendData("Log");
+                                    mService.mServerSocketThread.send("log", meters.get(i));
 
                                     break;
 
@@ -265,10 +268,12 @@ public class MainActivity extends AppCompatActivity {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     if (mPendingClearMeter != -1) {
-                        meters.get(mPendingClearMeter).sendData("Clear");
+                        //meters.get(mPendingClearMeter).sendData("Clear");
+                        mService.mServerSocketThread.send("clear", meters.get(mPendingClearMeter));
                         mPendingClearMeter = -1;
                     } else if (mPendingInsertionMeter != -1) {
-                        meters.get(mPendingInsertionMeter).sendData("Insertion");
+                        //meters.get(mPendingInsertionMeter).sendData("Insertion");
+                        mService.mServerSocketThread.send("insertion", meters.get(mPendingClearMeter));
                         mPendingInsertionMeter = -1;
                     }
                     break;
@@ -315,9 +320,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void displayLog(ArrayMap<String, String> arrayMap, final String id) {
+    public void displayLog(OscMessage message) {
 
-        final ArrayMap<String, String> finalArrayMap = arrayMap;
+        final OscMessage finalMessage = message;
 
         final MainActivity that = this;
 
@@ -335,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isStoragePermissionGranted()) {
                     try {
                         FileOutputStream outputStream = new FileOutputStream(logFile);
-                        outputStream.write(finalArrayMap.get("log").getBytes());
+                        outputStream.write(finalMessage.get(1).stringValue().getBytes());
                         outputStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -346,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
                 View logView = layoutInflater.inflate(R.layout.popup_log, null);
 
                 TextView txtLog = logView.findViewById(R.id.txtLog);
-                txtLog.append(finalArrayMap.get("log"));
+                txtLog.append(finalMessage.get(1).stringValue());
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
                 windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
@@ -392,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                                         String date = dateFormat.format(Calendar.getInstance().getTime());
 
 
-                                        final String fileName = date + " " + id + " events.log";
+                                        final String fileName = date + " " + finalMessage.get(0).stringValue() + " events.log";
 
                                         final File finalLogFile = new File(path, fileName);
                                         Log.d("TEST", "logFile path: " + finalLogFile.getAbsolutePath());
@@ -404,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
                                         if (mExternalStoragePermmisions == 1) {
                                             try {
                                                 FileOutputStream outputStream = new FileOutputStream(finalLogFile);
-                                                outputStream.write(finalArrayMap.get("log").getBytes());
+                                                outputStream.write(finalMessage.get(1).stringValue().getBytes());
                                                 outputStream.close();
                                             } catch (IOException e) {
                                                 e.printStackTrace();

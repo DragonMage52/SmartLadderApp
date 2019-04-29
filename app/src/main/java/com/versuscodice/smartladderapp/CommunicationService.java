@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
 
@@ -87,6 +88,8 @@ public class CommunicationService extends Service {
     String mSSID;
 
     Notification mNotification;
+
+    Handler sendHandler;
 
     public class CommunicationBinder extends Binder {
         CommunicationService getService() {
@@ -409,6 +412,8 @@ public class CommunicationService extends Service {
         private boolean run = true;
 
         OscP5 oscP5;
+        NetAddress remoteLocation;
+        OscMessage sendMessage;
 
         public SocketListenThread() {
 
@@ -441,12 +446,32 @@ public class CommunicationService extends Service {
                     }
                 }
             }
+            else if (message.checkAddrPattern("log")) {
+                mThat.displayLog(message);
+            }
         }
+
+        public void send(String command, Meter meter) {
+            remoteLocation = new NetAddress(meter.mIpAddress, meter.mPort);
+            sendMessage = new OscMessage(command);
+            sendMessage.add(command);
+            sendHandler.post(sendRunnable);
+        }
+
+        Runnable sendRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                oscP5.send(sendMessage, remoteLocation);
+            }
+        };
 
         @Override
         public void run() {
 
-
+            Looper.prepare();
+            sendHandler = new Handler();
+            Looper.loop();
 
             /*try {
                 mServerSocket = new ServerSocket(8975);

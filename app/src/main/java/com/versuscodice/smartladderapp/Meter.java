@@ -45,7 +45,7 @@ public class Meter {
     String hydrogensulfideLevel;
     String combExLevel;
     String version;
-    InetAddress mIpAddress;
+    String mIpAddress;
     int mPort = 0;
 
     boolean mAlarmState = false;
@@ -140,11 +140,12 @@ public class Meter {
         mBatteryDangerState = message.get(20).booleanValue();
         mAlarmOperator = message.get(21).booleanValue();
         mAlarmMeterOff = message.get(22).booleanValue();
-        mPort = message.get(23).intValue();
-        mInsertionCount = message.get(24).intValue();
-        version = message.get(25).stringValue();
-        caldueinterval = message.get(26).stringValue();
-        dateString = message.get(27).stringValue();
+        mInsertionCount = message.get(23).intValue();
+        version = message.get(24).stringValue();
+        caldueinterval = message.get(25).stringValue();
+        dateString = message.get(26).stringValue();
+        mIpAddress = message.get(27).stringValue();
+        mPort = message.get(28).intValue();
 
         if(!dateString.equals("")) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -435,7 +436,7 @@ public class Meter {
                             update(arrayMap);
                         }
                         else if(arrayMap.get("command").equals("log")) {
-                            mThat.displayLog(arrayMap, id);
+                            //mThat.displayLog(arrayMap, id);
                         }
                         else if(arrayMap.get("command").equals("date")) {
                             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
