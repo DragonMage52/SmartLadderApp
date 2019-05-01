@@ -449,12 +449,25 @@ public class CommunicationService extends Service {
             else if (message.checkAddrPattern("log")) {
                 mThat.displayLog(message);
             }
+            else if(message.checkAddrPattern("date")) {
+                SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd'T'HH:mm:ss");
+                for (Meter testMeter : meters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        send("date", format.format(Calendar.getInstance().getTime()), testMeter);
+                        return;
+                    }
+                }
+            }
         }
 
         public void send(String command, Meter meter) {
+            send(command, null, meter);
+        }
+
+        public void send(String command, String info, Meter meter) {
             remoteLocation = new NetAddress(meter.mIpAddress, meter.mPort);
             sendMessage = new OscMessage(command);
-            sendMessage.add(command);
+            sendMessage.add(info);
             sendHandler.post(sendRunnable);
         }
 
