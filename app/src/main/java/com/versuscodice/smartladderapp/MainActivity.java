@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
                         mPendingClearMeter = -1;
                     } else if (mPendingInsertionMeter != -1) {
                         //meters.get(mPendingInsertionMeter).sendData("Insertion");
-                        mService.mServerSocketThread.send("insertion", meters.get(mPendingClearMeter));
+                        mService.mServerSocketThread.send("insertion", meters.get(mPendingInsertionMeter));
                         mPendingInsertionMeter = -1;
                     }
                     break;
@@ -320,9 +320,13 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void displayLog(OscMessage message) {
+    public void displayLog(String id, String log) {
 
-        final OscMessage finalMessage = message;
+        //final OscMessage finalMessage = message;
+
+        final String finalLog = log;
+
+        final String finalId = id;
 
         final MainActivity that = this;
 
@@ -340,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isStoragePermissionGranted()) {
                     try {
                         FileOutputStream outputStream = new FileOutputStream(logFile);
-                        outputStream.write(finalMessage.get(1).stringValue().getBytes());
+                        outputStream.write(finalLog.getBytes());
                         outputStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -351,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                 View logView = layoutInflater.inflate(R.layout.popup_log, null);
 
                 TextView txtLog = logView.findViewById(R.id.txtLog);
-                txtLog.append(finalMessage.get(1).stringValue());
+                txtLog.append(finalLog);
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
                 windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
@@ -397,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
                                         String date = dateFormat.format(Calendar.getInstance().getTime());
 
 
-                                        final String fileName = date + " " + finalMessage.get(0).stringValue() + " events.log";
+                                        final String fileName = date + " " + finalId + " events.log";
 
                                         final File finalLogFile = new File(path, fileName);
                                         Log.d("TEST", "logFile path: " + finalLogFile.getAbsolutePath());
@@ -409,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
                                         if (mExternalStoragePermmisions == 1) {
                                             try {
                                                 FileOutputStream outputStream = new FileOutputStream(finalLogFile);
-                                                outputStream.write(finalMessage.get(1).stringValue().getBytes());
+                                                outputStream.write(finalLog.getBytes());
                                                 outputStream.close();
                                             } catch (IOException e) {
                                                 e.printStackTrace();

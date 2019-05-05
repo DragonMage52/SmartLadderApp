@@ -414,6 +414,8 @@ public class CommunicationService extends Service {
         OscP5 oscP5;
         NetAddress remoteLocation;
         OscMessage sendMessage;
+        String logBuffer = "";
+        int logIndex = 0;
 
         public SocketListenThread() {
 
@@ -447,7 +449,18 @@ public class CommunicationService extends Service {
                 }
             }
             else if (message.checkAddrPattern("log")) {
-                mThat.displayLog(message);
+                logBuffer += message.get(2).stringValue();
+                if(logIndex > message.get(1).intValue() && message.get(1).intValue() != -1) {
+                    logBuffer = "";
+                }
+                logIndex = message.get(1).intValue();
+                Log.d("TEST", "i = " + logIndex);
+                if(logIndex == -1) {
+                    //Log.d("TEST", "final message " + logBuffer);
+                    mThat.displayLog(message.get(0).stringValue(), logBuffer);
+                    logBuffer = "";
+                }
+               //mThat.displayLog(message);
             }
             else if(message.checkAddrPattern("date")) {
                 SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd'T'HH:mm:ss");
@@ -467,7 +480,9 @@ public class CommunicationService extends Service {
         public void send(String command, String info, Meter meter) {
             remoteLocation = new NetAddress(meter.mIpAddress, meter.mPort);
             sendMessage = new OscMessage(command);
-            sendMessage.add(info);
+            if(info != null) {
+                sendMessage.add(info);
+            }
             sendHandler.post(sendRunnable);
         }
 
@@ -475,7 +490,11 @@ public class CommunicationService extends Service {
 
             @Override
             public void run() {
-                oscP5.send(sendMessage, remoteLocation);
+                try {
+                    oscP5.send(sendMessage, remoteLocation);
+                } catch (IllegalArgumentException e) {
+                    Log.d("TEST", "Failed send");
+                }
             }
         };
 
