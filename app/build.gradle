@@ -78,3 +78,7 @@ dependencies {
 dependencies {
     compile 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
 }
+
+dependencies {
+    api 'com.github.sojamo:oscp5:v2.0.4'
+}

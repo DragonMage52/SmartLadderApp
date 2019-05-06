@@ -57,11 +57,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import netP5.NetAddress;
+import oscP5.OscMessage;
+import oscP5.OscP5;
+import oscP5.OscProperties;
 
 public class CommunicationService extends Service {
 
@@ -83,6 +89,8 @@ public class CommunicationService extends Service {
     String mSSID;
 
     Notification mNotification;
+
+    Handler sendHandler;
 
     public class CommunicationBinder extends Binder {
         CommunicationService getService() {
@@ -404,9 +412,104 @@ public class CommunicationService extends Service {
     public class SocketListenThread extends Thread {
         private boolean run = true;
 
+        OscP5 oscP5;
+        NetAddress remoteLocation;
+        OscMessage sendMessage;
+        String logBuffer = "";
+        int logIndex = 0;
+
+        public SocketListenThread() {
+
+            int listenPort = 14125;
+
+            try {
+                DatagramSocket s = new DatagramSocket();
+                listenPort = s.getLocalPort();
+                s.close();
+            } catch (SocketException e) {
+                Log.d("TEST", "Failed to open test UDP port");
+            }
+            OscProperties properties = new OscProperties();
+            properties.setDatagramSize(65535);
+            properties.setListeningPort(listenPort);
+            oscP5 = new OscP5(this, properties);
+            mListenPort = listenPort;
+        }
+
+        void oscEvent(OscMessage message) {
+            if (message.checkAddrPattern("update")) {
+                for (Meter testMeter : meters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        testMeter.update(message);
+                        return;
+                    }
+                }
+
+                for (Meter testMeter : backgroundMeters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        testMeter.update(message);
+                        return;
+                    }
+                }
+            }
+            else if (message.checkAddrPattern("log")) {
+                logBuffer += message.get(2).stringValue();
+                if(logIndex > message.get(1).intValue() && message.get(1).intValue() != -1) {
+                    logBuffer = "";
+                }
+                logIndex = message.get(1).intValue();
+                Log.d("TEST", "i = " + logIndex);
+                if(logIndex == -1) {
+                    //Log.d("TEST", "final message " + logBuffer);
+                    mThat.displayLog(message.get(0).stringValue(), logBuffer);
+                    logBuffer = "";
+                }
+               //mThat.displayLog(message);
+            }
+            else if(message.checkAddrPattern("date")) {
+                SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd'T'HH:mm:ss");
+                for (Meter testMeter : meters) {
+                    if (message.get(0).stringValue().equals(testMeter.id)) {
+                        send("date", format.format(Calendar.getInstance().getTime()), testMeter);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public void send(String command, Meter meter) {
+            send(command, null, meter);
+        }
+
+        public void send(String command, String info, Meter meter) {
+            remoteLocation = new NetAddress(meter.mIpAddress, meter.mPort);
+            sendMessage = new OscMessage(command);
+            if(info != null) {
+                sendMessage.add(info);
+            }
+            sendHandler.post(sendRunnable);
+        }
+
+        Runnable sendRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    oscP5.send(sendMessage, remoteLocation);
+                } catch (IllegalArgumentException e) {
+                    Log.d("TEST", "Failed send");
+                }
+            }
+        };
+
         @Override
         public void run() {
-            try {
+
+            Looper.prepare();
+            sendHandler = new Handler();
+            Looper.loop();
+
+            /*try {
                 mServerSocket = new ServerSocket(8975);
                 mListenPort = mServerSocket.getLocalPort();
             } catch (IOException e) {
@@ -435,7 +538,7 @@ public class CommunicationService extends Service {
                 } catch (IOException e1) {
                     Log.e("SocketListenThread", "Failed to accept client");
                 }
-            }
+            }*/
         }
 
         public void close() {
