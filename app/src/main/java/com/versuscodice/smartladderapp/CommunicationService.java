@@ -67,6 +67,7 @@ import java.util.Locale;
 import netP5.NetAddress;
 import oscP5.OscMessage;
 import oscP5.OscP5;
+import oscP5.OscProperties;
 
 public class CommunicationService extends Service {
 
@@ -428,7 +429,10 @@ public class CommunicationService extends Service {
             } catch (SocketException e) {
                 Log.d("TEST", "Failed to open test UDP port");
             }
-            oscP5 = new OscP5(this, listenPort);
+            OscProperties properties = new OscProperties();
+            properties.setDatagramSize(65535);
+            properties.setListeningPort(listenPort);
+            oscP5 = new OscP5(this, properties);
             mListenPort = listenPort;
         }
 
