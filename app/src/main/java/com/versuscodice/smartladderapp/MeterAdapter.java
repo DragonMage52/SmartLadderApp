@@ -252,10 +252,10 @@ public class MeterAdapter extends BaseAdapter {
             else if(thisMeter.mAlarmMeterOff) {
                 txtStatus.setText("ALARM-METER-OFF");
             }
-            else if(thisMeter.mAlarmBattery) {
+            else if(thisMeter.mBatteryState || thisMeter.mBatteryDangerState) {
                 txtStatus.setText("ALARM-BATTERY");
             }
-            else if(thisMeter.mAlarmMeterBattery) {
+            else if(thisMeter.mMeterBatteryState || thisMeter.mMeterBatteryDangerState) {
                 txtStatus.setText("ALARM-METER BATTERY");
             }
             else if(thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState) {

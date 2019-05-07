@@ -65,8 +65,6 @@ public class Meter {
 
     boolean mAlarmOperator = false;
     boolean mAlarmMeterOff = false;
-    boolean mAlarmMeterBattery = false;
-    boolean mAlarmBattery = false;
 
     boolean mActive = false;
 
@@ -104,7 +102,7 @@ public class Meter {
     }
 
     public Meter(ArrayMap<String, String> arrayMap) {
-        update(arrayMap);
+        //update(arrayMap);
     }
 
     public static void setContext(MainActivity that, MeterAdapter meterAdapter) {
@@ -228,7 +226,7 @@ public class Meter {
 
     }
 
-    public void update(ArrayMap<String, String> arrayMap) {
+    /*public void update(ArrayMap<String, String> arrayMap) {
         id = arrayMap.get("id");
         temp = arrayMap.get("temp");
         meterBatteryLevel = arrayMap.get("meterBatteryLevel");
@@ -335,7 +333,7 @@ public class Meter {
 
             }
         });
-    }
+    }*/
 
     public Runnable activeRunnable = new Runnable() {
         @Override
@@ -433,7 +431,7 @@ public class Meter {
                         Gson gson = new Gson();
                         ArrayMap<String, String> arrayMap = gson.fromJson(message, ArrayMap.class);
                         if(arrayMap.get("command").equals("update")) {
-                            update(arrayMap);
+                            //update(arrayMap);
                         }
                         else if(arrayMap.get("command").equals("log")) {
                             //mThat.displayLog(arrayMap, id);
