@@ -100,7 +100,6 @@ public class CommunicationService extends Service {
 
     @Override
     public void onCreate() {
-        Toast.makeText(this, "service creating", Toast.LENGTH_SHORT).show();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -197,7 +196,6 @@ public class CommunicationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 
         // If we get killed, after returning from here, restart
         return START_STICKY;
@@ -210,7 +208,6 @@ public class CommunicationService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
 
         try {
             mServerSocketThread.close();
@@ -228,18 +225,6 @@ public class CommunicationService extends Service {
                 metersID[count] = testMeter.id;
             }
             count++;
-
-            if (testMeter.mSocket != null) {
-                //testMeter.mManageThread.close();
-                testMeter.sendData("close");
-            }
-        }
-
-        for (Meter testMeter : backgroundMeters) {
-            if (testMeter.mSocket != null) {
-                //testMeter.mManageThread.close();
-                testMeter.sendData("close");
-            }
         }
 
         unregisterReceiver(mNotificationReceiver);
@@ -451,6 +436,15 @@ public class CommunicationService extends Service {
                         return;
                     }
                 }
+
+                final OscMessage finalMessage = message;
+
+                mThat.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        backgroundMeters.add(new Meter(finalMessage));
+                    }
+                });
             }
             else if (message.checkAddrPattern("log")) {
                 logBuffer += message.get(2).stringValue();

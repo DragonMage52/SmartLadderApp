@@ -101,8 +101,8 @@ public class Meter {
         id = mID;
     }
 
-    public Meter(ArrayMap<String, String> arrayMap) {
-        //update(arrayMap);
+    public Meter(OscMessage message) {
+        update(message);
     }
 
     public static void setContext(MainActivity that, MeterAdapter meterAdapter) {
@@ -175,7 +175,7 @@ public class Meter {
             mAlarmSilenceState = 0;
         }
 
-        if(!mInitalized) {
+        /*if(!mInitalized) {
             mInitalized = true;
 
             boolean found = false;
@@ -210,7 +210,7 @@ public class Meter {
                     }
                 });
             }
-        }
+        }*/
 
         mThat.runOnUiThread(new Runnable() {
             @Override
