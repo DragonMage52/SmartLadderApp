@@ -37,49 +37,33 @@
         app:layout_constraintTop_toBottomOf="@+id/txtLED" />
 
     <TextView
-        android:id="@+id/txtStaticLocalBattery"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="Ladder Battery:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticMeterBattery" />
-
-    <TextView
-        android:id="@+id/txtStaticMeterBattery"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="Meter Battery:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticCO" />
-
-    <TextView
         android:id="@+id/txtLocalBattery"
         android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticLocalBattery"
         app:layout_constraintTop_toBottomOf="@+id/txtRemoteBatteryLevel" />
 
     <TextView
         android:id="@+id/txtRemoteBatteryLevel"
-        android:layout_width="58dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticMeterBattery"
         app:layout_constraintTop_toBottomOf="@+id/txtCarbonDioxideLevel" />
 
     <TextView
@@ -95,95 +79,63 @@
         app:layout_constraintTop_toBottomOf="@+id/txtStaticInsertionCount" />
 
     <TextView
-        android:id="@+id/txtStaticO2"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="02:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticLEL" />
-
-    <TextView
-        android:id="@+id/txtStaticH2SO4"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="H2S:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticO2" />
-
-    <TextView
-        android:id="@+id/txtStaticCO"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="CO:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticH2SO4" />
-
-    <TextView
-        android:id="@+id/txtStaticLEL"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="LEL:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
-
-    <TextView
         android:id="@+id/txtOxygenLevel"
-        android:layout_width="58dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticO2"
         app:layout_constraintTop_toBottomOf="@+id/txtCombExLevel" />
 
     <TextView
         android:id="@+id/txtCarbonDioxideLevel"
-        android:layout_width="58dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticCO"
         app:layout_constraintTop_toBottomOf="@+id/txtHydrogenSulfideLevel" />
 
     <TextView
         android:id="@+id/txtCombExLevel"
-        android:layout_width="58dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticLEL"
         app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
 
     <TextView
         android:id="@+id/txtHydrogenSulfideLevel"
-        android:layout_width="58dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticH2SO4"
         app:layout_constraintTop_toBottomOf="@+id/txtOxygenLevel" />
 
     <TextView
@@ -201,26 +153,18 @@
         app:layout_constraintTop_toBottomOf="@+id/txtID" />
 
     <TextView
-        android:id="@+id/txtStaticInsertionCount"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="3dp"
-        android:text="Insertion Count:"
-        android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtStaticLocalBattery" />
-
-    <TextView
         android:id="@+id/txtInsertionCount"
         android:layout_width="wrap_content"
         android:layout_height="18dp"
-        android:layout_marginStart="125dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:text="TextView"
         android:textAlignment="viewStart"
         android:textColor="@color/colorBackground"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/txtStaticInsertionCount"
         app:layout_constraintTop_toBottomOf="@+id/txtLocalBattery" />
 
     <ImageView
@@ -232,5 +176,82 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_popup_sync" />
+
+    <TextView
+        android:id="@+id/txtStaticO2"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="02:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticLEL" />
+
+    <TextView
+        android:id="@+id/txtStaticMeterBattery"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="Meter Battery:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticCO" />
+
+    <TextView
+        android:id="@+id/txtStaticCO"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="CO:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticH2SO4" />
+
+    <TextView
+        android:id="@+id/txtStaticInsertionCount"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="Insertion Count:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticLocalBattery" />
+
+    <TextView
+        android:id="@+id/txtStaticH2SO4"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="H2S:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticO2" />
+
+    <TextView
+        android:id="@+id/txtStaticLEL"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="LEL:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStatus" />
+
+    <TextView
+        android:id="@+id/txtStaticLocalBattery"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
+        android:text="Ladder Battery:"
+        android:textColor="@color/colorBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtStaticMeterBattery" />
 
 </android.support.constraint.ConstraintLayout>
