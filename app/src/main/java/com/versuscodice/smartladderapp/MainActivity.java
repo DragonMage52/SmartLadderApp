@@ -53,6 +53,7 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -148,7 +149,16 @@ public class MainActivity extends AppCompatActivity {
             gridview = (GridView) findViewById(R.id.gridView);
             int orientation = getResources().getConfiguration().orientation;
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                gridview.setNumColumns(4);
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+
+                if(displayMetrics.widthPixels < 1600) {
+                    gridview.setNumColumns(3);
+                }
+                else {
+                    gridview.setNumColumns(4);
+                }
             } else {
                 gridview.setNumColumns(2);
             }
@@ -174,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                         popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Get Log");
                         popup.getMenu().add(Menu.NONE, 2, Menu.NONE, "Reset Insertion Count");
                         popup.getMenu().add(Menu.NONE, 3, Menu.NONE, "Clear Log");
-                        popup.getMenu().add(Menu.NONE, 4, Menu.NONE, "Version " + meters.get(i).version).setEnabled(false);
+                        popup.getMenu().add(Menu.NONE, 4, Menu.NONE, "Version: " + meters.get(i).version + "/" + meters.get(i).mAndroidVersion).setEnabled(false);
 
                     }
 
@@ -356,6 +366,10 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView txtLog = logView.findViewById(R.id.txtLog);
                 txtLog.append(finalLog);
+
+                ScrollView scrollView = logView.findViewById(R.id.scrollLog);
+                scrollView.fullScroll(View.FOCUS_DOWN);
+
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
                 windowmanager.getDefaultDisplay().getMetrics(displayMetrics);

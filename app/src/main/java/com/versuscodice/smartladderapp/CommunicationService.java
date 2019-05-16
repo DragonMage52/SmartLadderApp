@@ -383,10 +383,11 @@ public class CommunicationService extends Service {
             mThat.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (finalTotalAlarm > 0) {
+                    if (finalTotalAlarm > 0 && mThat.connectedToWifi) {
                         mThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
                         mThat.txtAlarms.setVisibility(View.VISIBLE);
-                    } else {
+                    } else if (mThat.connectedToWifi) {
+                        Log.d("TEST", "SETTING txtAlarms TO INVISIBLE");
                         mThat.txtAlarms.setVisibility(View.INVISIBLE);
                     }
                 }

@@ -194,6 +194,7 @@
         android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
+        android:autoSizeTextType="uniform"
         android:text="Meter Battery:"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
@@ -216,6 +217,7 @@
         android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
+        android:autoSizeTextType="uniform"
         android:text="Insertion Count:"
         android:textColor="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
@@ -249,8 +251,10 @@
         android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
+        android:autoSizeTextType="uniform"
         android:text="Ladder Battery:"
         android:textColor="@color/colorBackground"
+        app:layout_constraintDimensionRatio=""
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtStaticMeterBattery" />
 

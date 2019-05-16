@@ -91,6 +91,8 @@ public class Meter {
 
     int mCalDueInternal = 0;
 
+    String mAndroidVersion;
+
     public static CommunicationService mService;
 
     public Meter() {
@@ -143,7 +145,8 @@ public class Meter {
         caldueinterval = message.get(25).stringValue();
         dateString = message.get(26).stringValue();
         mIpAddress = message.get(27).stringValue();
-        mPort = message.get(28).intValue();
+        mAndroidVersion = message.get(28).stringValue();
+        mPort = message.get(29).intValue();
 
         if(!dateString.equals("")) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
