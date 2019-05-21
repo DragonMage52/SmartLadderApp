@@ -367,8 +367,13 @@ public class MainActivity extends AppCompatActivity {
                 TextView txtLog = logView.findViewById(R.id.txtLog);
                 txtLog.append(finalLog);
 
-                ScrollView scrollView = logView.findViewById(R.id.scrollLog);
-                scrollView.fullScroll(View.FOCUS_DOWN);
+                final ScrollView scrollView = logView.findViewById(R.id.scrollLog);
+                scrollView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollView.fullScroll(View.FOCUS_DOWN);
+                    }
+                }, 100);
 
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
