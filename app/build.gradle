@@ -36,11 +36,11 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.rafakob:NsdHelper:0.1.4'
+    api 'com.github.rafakob:NsdHelper:0.1.4'
 }
 
 dependencies {
-    compile 'co.lujun:lmbluetoothsdk:1.0.5'
+    api 'co.lujun:lmbluetoothsdk:1.0.5'
 }
 
 dependencies {
@@ -76,7 +76,7 @@ dependencies {
 }
 
 dependencies {
-    compile 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
+    api 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
 }
 
 dependencies {
