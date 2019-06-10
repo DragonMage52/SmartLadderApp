@@ -243,20 +243,23 @@ public class MeterAdapter extends BaseAdapter {
                 txtLED.setText("LADDER IDLE");
             }
 
-            if(thisMeter.mMeterState) {
+            if(thisMeter.mAlarmMeterOff) {
+                txtStatus.setText("ALARM-METER-OFF");
+            }
+            else if(thisMeter.mMeterState) {
                 txtStatus.setText("ALARM-GAS");
             }
             else if(thisMeter.mAlarmOperator) {
                 txtStatus.setText("ALARM-OPERATOR");
             }
-            else if(thisMeter.mAlarmMeterOff) {
-                txtStatus.setText("ALARM-METER-OFF");
-            }
-            else if(thisMeter.mBatteryState || thisMeter.mBatteryDangerState) {
-                txtStatus.setText("ALARM-BATTERY");
-            }
-            else if(thisMeter.mMeterBatteryState || thisMeter.mMeterBatteryDangerState) {
+            else if(thisMeter.mMeterBatteryDangerState && thisMeter.mBluetoothState) {
                 txtStatus.setText("ALARM-METER BATTERY");
+            }
+            else if(thisMeter.mBatteryDangerState) {
+                txtStatus.setText("ALARM-LADDER BATTERY");
+            }
+            else if(!thisMeter.mBluetoothState) {
+                txtStatus.setText("METER OFF");
             }
             else if(thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState) {
                 txtStatus.setText("CALIBRATION NEEDED");
@@ -264,11 +267,11 @@ public class MeterAdapter extends BaseAdapter {
             else if(thisMeter.mEarlyState) {
                 txtStatus.setText("SAMPLING");
             }
-            else if(!thisMeter.mBluetoothState) {
-                txtStatus.setText("METER OFF");
-            }
             else if(thisMeter.mEarlyDoneState && !thisMeter.mAlarmState && !thisMeter.mWarningState) {
                 txtStatus.setText("ENTER");
+            }
+            else if(thisMeter.mBatteryState) {
+                txtStatus.setText("LOW BATTERY");
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState){
                 txtStatus.setText("");

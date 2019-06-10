@@ -387,7 +387,6 @@ public class CommunicationService extends Service {
                         mThat.txtAlarms.setText(finalTotalAlarm + " Alarm(s)");
                         mThat.txtAlarms.setVisibility(View.VISIBLE);
                     } else if (mThat.connectedToWifi) {
-                        Log.d("TEST", "SETTING txtAlarms TO INVISIBLE");
                         mThat.txtAlarms.setVisibility(View.INVISIBLE);
                     }
                 }

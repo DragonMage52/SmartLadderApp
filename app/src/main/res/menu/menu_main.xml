@@ -11,4 +11,5 @@
         android:id="@+id/actSetting"
         android:orderInCategory="100"
         android:title="Settings" />
+
 </menu>

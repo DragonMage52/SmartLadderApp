@@ -149,22 +149,25 @@ public class MainActivity extends AppCompatActivity {
             gridview = (GridView) findViewById(R.id.gridView);
             int orientation = getResources().getConfiguration().orientation;
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
 
-                if(displayMetrics.widthPixels < 1600) {
+                DisplayMetrics metrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+                if(metrics.densityDpi < 420) {
                     gridview.setNumColumns(3);
                 }
                 else {
                     gridview.setNumColumns(4);
                 }
+
             } else {
                 gridview.setNumColumns(2);
             }
             ImageButton btnSilence = (ImageButton) findViewById(R.id.btnSilence);
             meterAdapter = new MeterAdapter(MainActivity.this, meters, btnSilence);
             gridview.setAdapter(meterAdapter);
+
+
 
             Meter.setContext(MainActivity.this, meterAdapter);
 
@@ -327,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+        menu.add(Menu.NONE, Menu.NONE, 100, "Version: " + BuildConfig.VERSION_NAME).setEnabled(false);
         return true;
     }
 
