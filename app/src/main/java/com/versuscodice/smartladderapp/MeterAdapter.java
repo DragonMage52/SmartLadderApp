@@ -226,7 +226,7 @@ public class MeterAdapter extends BaseAdapter {
             else if(thisMeter.mAlarmState) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorAlarm));
             }
-            else if(thisMeter.mWarningState || (thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState)) {
+            else if(thisMeter.mWarningState /*|| (thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState)*/) {
                 container.setBackgroundColor(mContext.getResources().getColor(R.color.colorWarning));
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState) {
@@ -261,9 +261,6 @@ public class MeterAdapter extends BaseAdapter {
             else if(!thisMeter.mBluetoothState) {
                 txtStatus.setText("METER OFF");
             }
-            else if(thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState) {
-                txtStatus.setText("CALIBRATION NEEDED");
-            }
             else if(thisMeter.mEarlyState) {
                 txtStatus.setText("SAMPLING");
             }
@@ -272,6 +269,9 @@ public class MeterAdapter extends BaseAdapter {
             }
             else if(thisMeter.mBatteryState) {
                 txtStatus.setText("LOW BATTERY");
+            }
+            else if(thisMeter.getDaysToCal() < 1 && thisMeter.mBluetoothState) {
+                txtStatus.setText("CALIBRATION NEEDED");
             }
             else if(!thisMeter.mLadderState && !thisMeter.mManState){
                 txtStatus.setText("");
