@@ -76,7 +76,7 @@ dependencies {
 }
 
 dependencies {
-    api 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
+    //api 'com.msasafety.a5x:library-limitedLiveRelease:1.2.1'
 }
 
 dependencies {

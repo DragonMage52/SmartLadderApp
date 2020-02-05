@@ -172,11 +172,12 @@ public class MeterAdapter extends BaseAdapter {
                 return view;
             }
 
-            if(thisMeter.mBatteryLevel.equals("0")) {
-                txtLocalBatteryLevel.setText("?%");
-            }
-            else {
-                txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
+            if(thisMeter.mBatteryLevel != null) {
+                if (thisMeter.mBatteryLevel.equals("0")) {
+                    txtLocalBatteryLevel.setText("?%");
+                } else {
+                    txtLocalBatteryLevel.setText(thisMeter.mBatteryLevel + "%");
+                }
             }
             if(thisMeter.mBluetoothState) {
                 //txtTemp.setText(thisMeter.temp + (char) 0x00B0 + "F");
