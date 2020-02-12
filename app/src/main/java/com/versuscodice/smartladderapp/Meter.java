@@ -26,6 +26,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import oscP5.OscArgument;
 import oscP5.OscMessage;
@@ -114,6 +116,15 @@ public class Meter {
 
     public void update(OscMessage message) {
 
+        Pattern pattern;
+        Matcher matcher;
+        pattern = Pattern.compile(".*hostAddress=([^,]+),.*");
+
+        matcher = pattern.matcher(message.toString());
+        matcher.matches();
+
+        mIpAddress = matcher.group(1);
+
         String caldueinterval;
         String dateString;
 
@@ -144,7 +155,7 @@ public class Meter {
         version = message.get(24).stringValue();
         caldueinterval = message.get(25).stringValue();
         dateString = message.get(26).stringValue();
-        mIpAddress = message.get(27).stringValue();
+        //mIpAddress = message.get(27).stringValue();
         mAndroidVersion = message.get(28).stringValue();
         mPort = message.get(29).intValue();
 
